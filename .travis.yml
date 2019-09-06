@@ -14,10 +14,6 @@ python:
 
 env:
   global:
-    # List package dependencies for conda
-    - CONDA_DEPS="pytest pytest-cov numpy matplotlib"
-    # dependencies not available with conda
-    - PIP_DEPS="python-fcl casadi pyquaternion"
     # package name for test invocation
     - PACKAGENAME="acrobotics"
 
@@ -33,11 +29,13 @@ before_install:
 - conda info -a
 - conda create -n testenv python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
-- conda install $CONDA_DEPS
-- pip install $PIP_DEPS
+- pip install -r requirements.txt
 
 install:
 - python setup.py install
 
 script:
 - pytest --cov=$PACKAGENAME
+
+after_success:
+- codecov
