@@ -5,3 +5,5 @@ casadi
 pyquaternion
 tqdm
 pytest
+pytest-cov
+codecov
