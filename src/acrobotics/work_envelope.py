@@ -3,7 +3,7 @@ from .robot import Robot
 from .inverse_kinematics.ik_result import IKResult
 from tqdm import tqdm
 
-from acrolib.quaternion import Quaternion
+from pyquaternion import Quaternion
 
 
 class EnvelopeSettings:
