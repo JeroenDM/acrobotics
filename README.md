@@ -23,6 +23,9 @@ cd acrobotics
 python setup.py develop
 ```
 
+No Windows support for the moment because [python-fcl](https://pypi.org/project/python-fcl/) is not supported. :(
+In the future I will possibly switch to [pybullet](https://pypi.org/project/pybullet/). In the meantime, use [windows subsystem for linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10). MacOS is not tested yet.
+
 ## Gettings started
 
 (Code for example below: [examples/getting_started.py](examples/getting_started.py))
