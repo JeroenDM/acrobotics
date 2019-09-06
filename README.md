@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/JeroenDM/acrobotics.svg?branch=master)](https://travis-ci.org/JeroenDM/acrobotics) [![codecov](https://codecov.io/gh/JeroenDM/acrobotics/branch/master/graph/badge.svg)](https://codecov.io/gh/JeroenDM/acrobotics)
+
 # Acrobotics
 
 Quickly test motion planning ideas is the goal, and Python seems like a great language for rapid prototyping. There are great libraries for robot simulation and related task, but installing them is can be a hassle and very dependent on operating system and python version.
