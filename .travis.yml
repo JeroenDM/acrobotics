@@ -15,7 +15,7 @@ python:
 env:
   global:
     # List package dependencies for conda
-    - CONDA_DEPS="pytest numpy matplotlib"
+    - CONDA_DEPS="pytest pytest-cov numpy matplotlib"
     # dependencies not available with conda
     - PIP_DEPS="python-fcl casadi pyquaternion"
     # package name for test invocation
@@ -40,4 +40,4 @@ install:
 - python setup.py install
 
 script:
-- pytest $PACKAGENAME
+- pytest --cov=$PACKAGENAME
