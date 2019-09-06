@@ -35,7 +35,7 @@ install:
 - python setup.py install
 
 script:
-- pytest --cov=$PACKAGENAME
+- pytest --cov-report term --cov=$PACKAGENAME
 
 after_success:
 - codecov
