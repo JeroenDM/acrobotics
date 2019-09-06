@@ -1,4 +1,9 @@
+#PyCharm
+.idea
+
+#vscode
 .vscode/
+
 .coverage
 
 # Byte-compiled / optimized / DLL files
