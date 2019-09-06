@@ -1,0 +1,6 @@
+numpy
+matplotlib
+python-fcl
+casadi
+tqdm
+pytest
