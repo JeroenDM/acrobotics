@@ -1,8 +1,11 @@
-#PyCharm
+# PyCharm
 .idea
 
-#vscode
+# vscode
 .vscode/
+
+# mkdocs
+site/
 
 .coverage
 

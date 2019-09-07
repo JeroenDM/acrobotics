@@ -1,0 +1,8 @@
+site_name: acrobotics
+nav:
+  - Home: index.md
+  - Robots: robots_and_links.ipynb
+  - Geometry: geometry.ipynb
+
+plugins:
+  - mknotebooks
