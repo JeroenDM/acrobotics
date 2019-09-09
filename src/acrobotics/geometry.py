@@ -54,3 +54,13 @@ class ShapeSoup:
                 if shape1.is_in_collision(tf1, shape2, tf2):
                     return True
         return False
+
+
+class Scene(ShapeSoup):
+    """ ShapeSoup was a bad name, refactor once ready.
+    Scene is also not perfect as a scene can be part of
+    a robot link, wich sounds strange.
+    ShapeGroup?
+    """
+
+    pass
