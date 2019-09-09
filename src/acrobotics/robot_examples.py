@@ -28,9 +28,9 @@ class PlanarArm(Robot):
 
     def __init__(self, a1=1, a2=1, a3=1):
         geometry = [
-            ShapeSoup([Box(-a1 / 2, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(-a2 / 2, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(-a3 / 2, 0.1, 0.1)], [np.eye(4)]),
+            ShapeSoup([Box(a1, 0.1, 0.1)], [np.eye(4)]),
+            ShapeSoup([Box(a2, 0.1, 0.1)], [np.eye(4)]),
+            ShapeSoup([Box(a3, 0.1, 0.1)], [np.eye(4)]),
         ]
         super().__init__(
             [
@@ -88,7 +88,7 @@ class AnthropomorphicArm(Robot):
 
     def __init__(self, a2=1, a3=1):
         geometry = [
-            ShapeSoup([Box(0.1, 0.3, 0.3)], [translation(-0.05, 0, 0)]),
+            ShapeSoup([Box(0.3, 0.3, 0.1)], [translation(0, 0, 0.05)]),
             ShapeSoup([Box(a2, 0.1, 0.1)], [translation(-a2 / 2, 0, 0)]),
             ShapeSoup([Box(a3, 0.1, 0.1)], [translation(-a3 / 2, 0, 0)]),
         ]
