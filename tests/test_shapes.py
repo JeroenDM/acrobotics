@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from numpy.testing import assert_almost_equal
 
-from acrobotics.shapes import Box
+from acrobotics.shapes import Box, Cylinder
+from acrobotics.util import rot_z, rot_y
 
 
 tf_identity = np.eye(4)
@@ -146,3 +147,102 @@ class TestShape:
         ax = fig.gca(projection="3d")
         b1.plot(ax, tf_identity)
         assert True
+
+
+class TestCylinder:
+    def test_4_faces(self):
+        cyl = Cylinder(1, 2, approx_faces=4)
+
+        n = cyl.get_normals(np.eye(4))
+        n_desired = np.array(
+            [[1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]
+        )
+        assert_almost_equal(n, n_desired)
+
+        v = cyl.get_vertices(np.eye(4))
+        v_desired = np.array(
+            [
+                [1, 0, 1],
+                [0, 1, 1],
+                [-1, 0, 1],
+                [0, -1, 1],
+                [1, 0, -1],
+                [0, 1, -1],
+                [-1, 0, -1],
+                [0, -1, -1],
+            ]
+        )
+        v_desired = (rot_z(np.pi / 4) @ v_desired.T).T
+        assert_almost_equal(v, v_desired)
+
+        e = cyl.get_edges(np.eye(4))
+        e_desired = np.zeros((12, 6))
+
+        vd = v_desired
+        e_desired[0] = np.hstack((vd[3], vd[0]))
+        e_desired[1] = np.hstack((vd[0], vd[1]))
+        e_desired[2] = np.hstack((vd[1], vd[2]))
+        e_desired[3] = np.hstack((vd[2], vd[3]))
+
+        e_desired[4] = np.hstack((vd[7], vd[4]))
+        e_desired[5] = np.hstack((vd[4], vd[5]))
+        e_desired[6] = np.hstack((vd[5], vd[6]))
+        e_desired[7] = np.hstack((vd[6], vd[7]))
+
+        e_desired[8] = np.hstack((vd[0], vd[4]))
+        e_desired[9] = np.hstack((vd[1], vd[5]))
+        e_desired[10] = np.hstack((vd[2], vd[6]))
+        e_desired[11] = np.hstack((vd[3], vd[7]))
+
+        assert e.shape == e_desired.shape
+        assert_almost_equal(e[0:4], e_desired[0:4])
+        assert_almost_equal(e[4:8], e_desired[4:8])
+        assert_almost_equal(e[8:12], e_desired[8:12])
+
+    def test_4_faces_transformed(self):
+
+        tf = np.eye(4)
+        tf[:3, 3] = np.array([5, -3, 7])
+        tf[:3, :3] = rot_y(0.5) @ rot_z(-0.3)
+
+        cyl = Cylinder(1, 2, approx_faces=4)
+
+        n = cyl.get_normals(tf)
+        n_desired = np.array(
+            [[1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]
+        )
+        n_desired = (tf[:3, :3] @ n_desired.T).T
+        assert_almost_equal(n, n_desired)
+
+        v = cyl.get_vertices(tf)
+        v_desired = np.array(
+            [
+                [1, 0, 1],
+                [0, 1, 1],
+                [-1, 0, 1],
+                [0, -1, 1],
+                [1, 0, -1],
+                [0, 1, -1],
+                [-1, 0, -1],
+                [0, -1, -1],
+            ]
+        )
+        v_desired = (rot_z(np.pi / 4) @ v_desired.T).T
+        v_desired = (tf[:3, :3] @ v_desired.T).T + tf[:3, 3]
+        assert_almost_equal(v, v_desired)
+
+    def test_plot_cylinder(self):
+        cyl = Cylinder(1, 2)
+
+        fig = plt.figure()
+        ax = fig.gca(projection="3d")
+
+        tf = np.eye(4)
+        tf[:3, 3] = np.array([0, 5, -3])
+        tf[:3, :3] = rot_y(np.pi / 4)
+
+        cyl.plot(ax, tf, c="k")
+
+        # plt.show(block=True)
+        assert True
+

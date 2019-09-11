@@ -26,6 +26,7 @@ class Shape(ABC):
 
     """
 
+    num_edges: int
     fcl_shape: fcl.CollisionGeometry
     request: fcl.CollisionRequest
     result: fcl.CollisionResult
@@ -54,7 +55,7 @@ class Shape(ABC):
 
     def get_empty_plot_lines(self, ax, *arg, **kwarg):
         """ Create empty lines to initialize an animation """
-        return [ax.plot([], [], "-", *arg, **kwarg)[0] for i in range(12)]
+        return [ax.plot([], [], "-", *arg, **kwarg)[0] for i in range(self.num_edges)]
 
     def update_plot_lines(self, lines, tf):
         """ Update existing lines on a plot using the given transform tf"""
@@ -84,6 +85,7 @@ class Box(Shape):
         self.dx = dx
         self.dy = dy
         self.dz = dz
+        self.num_edges = 12
         self.fcl_shape = fcl.Box(dx, dy, dz)
         self.request = fcl.CollisionRequest()
         self.result = fcl.CollisionResult()
@@ -144,4 +146,100 @@ class Box(Shape):
         A = self.get_normals(tf)
         b = 0.5 * np.array([self.dx, self.dx, self.dy, self.dy, self.dz, self.dz])
         b = b + np.dot(A, tf[:3, 3])
+        return Polyhedron(A, b)
+
+
+class Cylinder(Shape):
+    """
+    I'm just a Box with six sides.
+    But you would be suprised,
+    how many robots this provides.
+    """
+
+    def __init__(self, radius, length, approx_faces=8):
+        self.r = radius
+        self.l = length
+        # the number of faces to use in the polyherdron approximation
+        self.nfac = approx_faces
+        self.num_edges = 3 * self.nfac
+        self.fcl_shape = fcl.Cylinder(radius, length)
+        self.request = fcl.CollisionRequest()
+        self.result = fcl.CollisionResult()
+
+    def get_vertices(self, tf):
+        v = np.zeros((2 * self.nfac, 3))
+
+        # angle offset because vertices do not coincide with
+        # local x-axis by convention
+        angle_offset = 2 * np.pi / self.nfac / 2
+
+        # upper part along +z
+        for k in range(self.nfac):
+            angle = 2 * np.pi * k / self.nfac + angle_offset
+            v[k] = np.array(
+                [self.r * np.cos(angle), self.r * np.sin(angle), self.l / 2]
+            )
+
+        # lower part along -z
+        for k in range(self.nfac):
+            angle = 2 * np.pi * k / self.nfac + angle_offset
+            v[k + self.nfac] = np.array(
+                [self.r * np.cos(angle), self.r * np.sin(angle), -self.l / 2]
+            )
+
+        # tranform normals using tf (translation not relevant for normals)
+        for i in range(len(v)):
+            v[i] = tf[:3, :3] @ v[i] + tf[:3, 3]
+        return v
+
+    def get_edges(self, tf):
+        v = self.get_vertices(tf)
+        e = np.zeros((3 * self.nfac, 6))
+
+        # upper part
+        e[0] = np.hstack((v[self.nfac - 1], v[0]))
+        for k in range(1, self.nfac):
+            e[k] = np.hstack((v[k - 1], v[k]))
+
+        # lower part
+        # upper part
+        e[self.nfac] = np.hstack((v[2 * self.nfac - 1], v[self.nfac]))
+        for k in range(1, self.nfac):
+            e[k + self.nfac] = np.hstack((v[k + self.nfac - 1], v[k + self.nfac]))
+
+        # edges along z axis
+        for k in range(self.nfac):
+            e[k + 2 * self.nfac] = np.hstack((v[k], v[k + self.nfac]))
+
+        # note: tf is already applied when calculating the vertices
+        return e
+
+    def get_normals(self, tf):
+        n = np.zeros((self.nfac + 2, 3))
+
+        # normals at around the cylinder
+        for k in range(self.nfac):
+            angle = 2 * np.pi * k / self.nfac
+            n[k] = np.array([np.cos(angle), np.sin(angle), 0])
+
+        # normals from top and bottom
+        n[-2] = np.array([0, 0, 1])
+        n[-1] = np.array([0, 0, -1])
+
+        # tranform normals using tf (translation not relevant for normals)
+        for i in range(len(n)):
+            n[i] = tf[:3, :3] @ n[i]
+        return n
+
+    def get_polyhedron(self, tf):
+        """ Shape represented as inequality A*x <= b
+        
+        This is usefull when modelling the "no collision" constraints
+        as a separating hyperplane problem.
+        """
+        A = self.get_normals(tf)
+        b = self.r * np.ones(len(A))
+        b[-2] = self.l / 2
+        b[-1] = -self.l / 2
+        b = b + A @ tf[:3, 3]
         return Polyhedron(A, b)
