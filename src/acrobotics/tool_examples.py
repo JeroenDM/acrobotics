@@ -31,6 +31,8 @@ s = [
     Box(0.10, 0.025, 0.025),
 ]
 
+z_offset = 0.02  # tool stick-put + offset
+
 # ==============================================================================
 # Create shape transforms relative to tool base
 # ==============================================================================
@@ -45,7 +47,7 @@ tf4[:3, 3] = pos_data[3]
 tf5[:3, 3] = pos_data[4]
 R2 = rot_z(angle2)
 tf5[:3, :3] = R2
-tool_tip[:3, 3] = pos_data[4] + np.dot(R2, np.array([0.05 + 0.01, 0, 0]))
+tool_tip[:3, 3] = pos_data[4] + np.dot(R2, np.array([0.05 + z_offset, 0, 0]))
 tool_tip[:3, :3] = R2
 
 # rotate links 2-5 relative to base 1
@@ -64,7 +66,7 @@ tool_tip[:3, :3] = np.dot(tool_tip[:3, :3], rot_y(np.pi / 2))
 tfs = [tf1, tf2, tf3, tf4, tf5]
 
 # ==============================================================================
-# Create tool and plot result
+# Tool 1
 # ==============================================================================
 tf_tool = np.eye(4)
 tf_tool[:3, :3] = np.dot(rot_y(-np.pi / 2), rot_x(-np.pi / 2))
@@ -74,3 +76,21 @@ for i in range(len(tfs)):
     tfs[i] = np.dot(tf_tool, tfs[i])
 
 torch = Tool(s, tfs, tool_tip)
+
+# ==============================================================================
+# Tool 2 with a "rounded" tip
+# ==============================================================================
+tf6 = np.copy(tf5)
+tf6[:3, 3] = tf6[:3, 3] + tf5[:3, :3] @ np.array([0.045, 0, 0])
+
+
+s6 = Box(0.01, 0.018, 0.018)
+tfs_2 = [tf1, tf2, tf3, tf4, tf5, tf6]
+tfs_2 = [tf_tool @ tf for tf in tfs_2]
+
+shapes_2 = s.copy()
+shapes_2.append(s6)
+shapes_2[-2] = Box(0.09, 0.025, 0.025)
+tfs_2[-2][:3, 3] = tfs_2[-2][:3, 3] + tfs_2[-2][:3, :3] @ np.array([-0.005, 0, 0])
+
+torch2 = Tool(shapes_2, tfs_2, tool_tip)
