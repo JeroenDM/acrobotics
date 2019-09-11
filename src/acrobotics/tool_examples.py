@@ -2,7 +2,7 @@
 Define a simplified model of a welding torch.
 """
 import numpy as np
-from .shapes import Box
+from .shapes import Box, Cylinder
 from .geometry import ShapeSoup
 from .util import rot_x, rot_y, rot_z
 from .robot import Tool
@@ -94,3 +94,28 @@ shapes_2[-2] = Box(0.09, 0.025, 0.025)
 tfs_2[-2][:3, 3] = tfs_2[-2][:3, 3] + tfs_2[-2][:3, :3] @ np.array([-0.005, 0, 0])
 
 torch2 = Tool(shapes_2, tfs_2, tool_tip)
+
+# ==============================================================================
+# Tool 3: replace last two tip shapes with cylinders
+# ==============================================================================
+
+
+shapes_3 = [
+    Box(0.08, 0.08, 0.08),
+    Box(0.18, 0.075, 0.075),
+    Box(0.03, 0.22, 0.07),
+    Box(0.10, 0.025, 0.025),
+    Cylinder(0.025 / 2, 0.09),  # Box(0.10, 0.025, 0.025),
+    Cylinder(0.018 / 2, 0.01),  # Box(0.01, 0.018, 0.018),
+]
+
+tfs_3 = [np.copy(tf) for tf in tfs_2]
+
+
+# cylinders along z-axis, boxes where along x-axis
+R_adjust = rot_y(np.pi / 2)
+tfs_3[-2][:3, :3] = tfs_3[-2][:3, :3] @ R_adjust
+tfs_3[-1][:3, :3] = tfs_3[-1][:3, :3] @ R_adjust
+
+
+torch3 = Tool(shapes_3, tfs_3, tool_tip)
