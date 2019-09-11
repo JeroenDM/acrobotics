@@ -183,6 +183,15 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
 
     def is_in_collision(self, q, collection):
         if collection is not None:
+            geom_links = [l.geometry for l in self.links]
+            tf_links = self.fk_all_links(q)
+
+            # check collision with tool first
+            if self.geometry_tool is not None:
+                tf_tool = tf_links[-1]
+                if self.geometry_tool.is_in_collision(collection, tf_self=tf_tool):
+                    return True
+
             # check collision of fixed base geometry
             base = self.geometry_base
             if base is not None:
@@ -190,19 +199,11 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
                     return True
 
             # check collision for all links
-            geom_links = [l.geometry for l in self.links]
-            tf_links = self.fk_all_links(q)
-
             for i in self.collision_priority:
                 if geom_links[i].is_in_collision(collection, tf_self=tf_links[i]):
                     # move current index to front of priority list
                     self.collision_priority.remove(i)
                     self.collision_priority.insert(0, i)
-                    return True
-
-            if self.geometry_tool is not None:
-                tf_tool = tf_links[-1]
-                if self.geometry_tool.is_in_collision(collection, tf_self=tf_tool):
                     return True
 
         if self.do_check_self_collision:
