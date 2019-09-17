@@ -29,6 +29,8 @@ before_install:
 - conda info -a
 - conda create -n testenv python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
+# install cython before trying to installing acrolib
+- pip install cython
 - pip install -r requirements.txt
 
 install:
