@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
-from acrobotics.work_envelope import (
+from acrobotics.workspace_envelope import (
     sample_position,
     process_ik_solution,
     calculate_reachability,
@@ -51,20 +51,12 @@ def test_process_ik_result():
     assert res == 0
 
 
-# def test_generate_envelop():
-# robot = Kuka()
-# print(robot.estimate_max_extension())
-# settings = EnvelopeSettings(0.1, 10, 8)
-# test = generate_robot_envelope(robot, settings)
+def test_generate_envelop():
+    robot = Kuka()
+    settings = EnvelopeSettings(1.0, 10, 8)
+    we = generate_robot_envelope(robot, settings)
 
-# print(test)
+    max_extension = robot.estimate_max_extension()
+    num_points = int(2 * max_extension / settings.sample_distance)
 
-
-# def test_generate_positions():
-# test = generate_positions(10, 3)
-# print(test.shape)
-# print(test[0, 0, 0])
-
-# r = np.zeros((3, 3, 3))
-# r[0, 0, 2] = 1
-# print(test[r < 0.5])
+    assert we.shape == (num_points ** 3, 4)
