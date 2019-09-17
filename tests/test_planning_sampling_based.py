@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from numpy.testing import assert_almost_equal
 
@@ -39,7 +40,7 @@ class DummyRobot(Robot):
         return tf
 
 
-def test_complete_problem():
+def test_tol_quat_pt_with_weights():
     path_ori_free = []
     for s in np.linspace(0, 1, 3):
         xi = 0.8
@@ -64,17 +65,21 @@ def test_complete_problem():
     # robot.tool = torch
     setup = PlanningSetup(robot, path_ori_free, scene1)
 
+    # weights to express the importance of the joints in the cost function
+    joint_weights = [10.0, 5.0, 1.0, 1.0, 1.0, 1.0]
+
     settings = SamplingSetting(
         SearchStrategy.INCREMENTAL,
         sample_method=SampleMethod.random_uniform,
         num_samples=500,
         iterations=2,
         tolerance_reduction_factor=2,
+        weights=joint_weights,
     )
 
     solve_set = SolverSettings(
         SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+        CostFuntionType.weighted_sum_squared,
         sampling_settings=settings,
     )
 
@@ -201,3 +206,93 @@ def test_euler_pt_planning_problem():
     # ax.set_axis_off()
     # robot.animate_path(fig, ax, sol.joint_positions)
     # plt.show(block=True)
+
+
+def test_state_cost():
+    robot = Kuka()
+
+    table = Box(0.5, 0.5, 0.1)
+    table_tf = np.array(
+        [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.00], [0, 0, 0, 1]]
+    )
+    scene1 = Scene([table], [table_tf])
+
+    # create path
+    quat = Quaternion(axis=np.array([1, 0, 0]), angle=-3 * np.pi / 4)
+
+    pos_tol = 3 * [NoTolerance()]
+    # rot_tol = 3 * [NoTolerance()]
+    rot_tol = [
+        NoTolerance(),
+        SymmetricTolerance(np.pi / 4, 20),
+        SymmetricTolerance(np.pi, 20),
+    ]
+    first_point = TolEulerPt(np.array([0.9, -0.1, 0.2]), quat, pos_tol, rot_tol)
+    # end_position = np.array([0.9, 0.1, 0.2])
+
+    # path = create_line(first_point, end_position, 5)
+    path = create_arc(
+        first_point, np.array([0.9, 0.0, 0.2]), np.array([0, 0, 1]), 2 * np.pi, 5
+    )
+
+    planner_settings = SamplingSetting(
+        SearchStrategy.GRID,
+        iterations=1,
+        tolerance_reduction_factor=2,
+        use_state_cost=True,
+        state_cost_weight=10.0,
+    )
+
+    solver_settings = SolverSettings(
+        SolveMethod.sampling_based,
+        CostFuntionType.sum_squared,
+        sampling_settings=planner_settings,
+    )
+
+    setup = PlanningSetup(robot, path, scene1)
+
+    sol = solve(setup, solver_settings)
+    assert sol.success
+
+
+def test_exceptions():
+    settings = SamplingSetting(
+        SearchStrategy.INCREMENTAL,
+        sample_method=SampleMethod.random_uniform,
+        num_samples=500,
+        iterations=2,
+        tolerance_reduction_factor=2,
+    )
+
+    solve_set = SolverSettings(
+        SolveMethod.sampling_based,
+        CostFuntionType.weighted_sum_squared,
+        sampling_settings=settings,
+    )
+
+    setup = PlanningSetup(None, None, None)
+    with pytest.raises(Exception) as e:
+        solve(setup, solve_set)
+    assert (
+        str(e.value)
+        == "No weights specified in SamplingSettings for the weighted cost function."
+    )
+
+    robot = Kuka()
+    scene = Scene([], [])
+
+    pos = np.array([1000, 0, 0])
+    quat = Quaternion(axis=np.array([1, 0, 0]), angle=-3 * np.pi / 4)
+    path = [TolPositionPt(pos, quat, 3 * [NoTolerance()])]
+
+    solve_set2 = SolverSettings(
+        SolveMethod.sampling_based,
+        CostFuntionType.sum_squared,
+        sampling_settings=settings,
+    )
+
+    setup2 = PlanningSetup(robot, path, scene)
+    with pytest.raises(Exception) as e:
+        solve(setup2, solve_set2)
+    assert str(e.value) == f"No valid joint solutions for path point {0}."
+
