@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages, Extension
+import numpy
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
@@ -11,7 +12,7 @@ geometry_module = Extension(
     language="c++",
     extra_compile_args=["-std=c++11"],
     sources=["src/acrobotics/cpp/geometry.i", "src/acrobotics/cpp/src/geometry.cpp"],
-    include_dirs=["src/acrobotics/cpp/include", "/usr/include/eigen3"],
+    include_dirs=["src/acrobotics/cpp/include", "/usr/include/eigen3", numpy.get_include()],
     swig_opts=["-c++", "-I acrobotics/cpp"],
 )
 
