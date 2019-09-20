@@ -19,6 +19,7 @@ env:
     - PACKAGENAME="acrobotics"
 
 before_install:
+- sudo apt-get install swig3.0
 # Here we download miniconda and install the dependencies
 - export MINICONDA=$HOME/miniconda
 - export PATH="$MINICONDA/bin:$PATH"
