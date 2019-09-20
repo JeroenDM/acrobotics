@@ -1,10 +1,20 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+geometry_module = Extension(
+    "_geometry",
+    language="c++",
+    extra_compile_args=["-std=c++11"],
+    sources=["src/acrobotics/cpp/geometry.i", "src/acrobotics/cpp/src/geometry.cpp"],
+    include_dirs=["src/acrobotics/cpp/include", "/usr/include/eigen3"],
+    swig_opts=["-c++", "-I acrobotics/cpp"],
+)
+
 
 setup(
     name="acrobotics",
@@ -25,4 +35,6 @@ setup(
     ],
     package_dir={"": "src"},
     python_requires=">=3.6",
+    ext_package="acrobotics.cpp",
+    ext_modules=[geometry_module],
 )

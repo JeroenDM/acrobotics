@@ -1,8 +1,9 @@
-import fcl
 import numpy as np
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
+
+from .cpp.geometry import Box as CppBox
 
 
 def transform_vector(tf, vector):
@@ -27,9 +28,6 @@ class Shape(ABC):
     """
 
     num_edges: int
-    fcl_shape: fcl.CollisionGeometry
-    request: fcl.CollisionRequest
-    result: fcl.CollisionResult
 
     @abstractmethod
     def get_vertices(self, transform: np.ndarray) -> np.ndarray:
@@ -43,15 +41,10 @@ class Shape(ABC):
     def get_normals(self, transform: np.ndarray) -> np.ndarray:
         pass
 
+    @abstractmethod
     def is_in_collision(self, tf, other, tf_other):
         """ Collision checking with another shape for the given transforms. """
-        fcl_tf_1 = fcl.Transform(tf[:3, :3], tf[:3, 3])
-        fcl_tf_2 = fcl.Transform(tf_other[:3, :3], tf_other[:3, 3])
-
-        o1 = fcl.CollisionObject(self.fcl_shape, fcl_tf_1)
-        o2 = fcl.CollisionObject(other.fcl_shape, fcl_tf_2)
-
-        return fcl.collide(o1, o2, self.request, self.result)
+        pass
 
     def get_empty_plot_lines(self, ax, *arg, **kwarg):
         """ Create empty lines to initialize an animation """
@@ -86,9 +79,13 @@ class Box(Shape):
         self.dy = dy
         self.dz = dz
         self.num_edges = 12
-        self.fcl_shape = fcl.Box(dx, dy, dz)
-        self.request = fcl.CollisionRequest()
-        self.result = fcl.CollisionResult()
+        self.cpp_box = CppBox(dx, dy, dz)
+
+    def is_in_collision(self, tf, other, tf_other):
+        """ Collision checking with another shape for the given transforms. """
+        self.cpp_box.set_transform(tf)
+        other.cpp_box.set_transform(tf_other)
+        return self.cpp_box.is_in_collision(other.cpp_box)
 
     def get_vertices(self, tf):
         v = np.zeros((8, 3))
@@ -139,7 +136,7 @@ class Box(Shape):
 
     def get_polyhedron(self, tf):
         """ Shape represented as inequality A*x <= b
-        
+
         This is usefull when modelling the "no collision" constraints
         as a separating hyperplane problem.
         """
@@ -162,9 +159,10 @@ class Cylinder(Shape):
         # the number of faces to use in the polyherdron approximation
         self.nfac = approx_faces
         self.num_edges = 3 * self.nfac
-        self.fcl_shape = fcl.Cylinder(radius, length)
-        self.request = fcl.CollisionRequest()
-        self.result = fcl.CollisionResult()
+
+    def is_in_collision(self, tf, other, tf_other):
+        """ Collision checking with another shape for the given transforms. """
+        raise NotImplementedError()
 
     def get_vertices(self, tf):
         v = np.zeros((2 * self.nfac, 3))
@@ -233,7 +231,7 @@ class Cylinder(Shape):
 
     def get_polyhedron(self, tf):
         """ Shape represented as inequality A*x <= b
-        
+
         This is usefull when modelling the "no collision" constraints
         as a separating hyperplane problem.
         """
