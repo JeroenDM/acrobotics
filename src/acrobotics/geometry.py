@@ -55,6 +55,21 @@ class ShapeSoup:
                     return True
         return False
 
+    def is_path_in_collision(self, tf_self, tf_target, other, tf_other=None):
+        tf_shapes_self = [tf_self @ tf for tf in self.tf_s]
+        tf_shapes_target = [tf_target @ tf for tf in self.tf_s]
+
+        tf_shapes_other = other.tf_s
+        if tf_other is not None:
+            tf_shapes_other = [tf_other @ tf for tf in tf_shapes_other]
+
+        # check for collision between all those shapes
+        for tf1, tf1_target, shape1 in zip(tf_shapes_self, tf_shapes_target, self.s):
+            for tf2, shape2 in zip(tf_shapes_other, other.s):
+                if shape1.is_path_in_collision(tf1, tf1_target, shape2, tf2):
+                    return True
+        return False
+
 
 class Scene(ShapeSoup):
     """ ShapeSoup was a bad name, refactor once ready.

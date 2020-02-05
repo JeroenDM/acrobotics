@@ -30,6 +30,8 @@ class Shape(ABC):
     fcl_shape: fcl.CollisionGeometry
     request: fcl.CollisionRequest
     result: fcl.CollisionResult
+    c_req: fcl.ContinuousCollisionRequest
+    c_res: fcl.ContinuousCollisionResult
 
     @abstractmethod
     def get_vertices(self, transform: np.ndarray) -> np.ndarray:
@@ -52,6 +54,23 @@ class Shape(ABC):
         o2 = fcl.CollisionObject(other.fcl_shape, fcl_tf_2)
 
         return fcl.collide(o1, o2, self.request, self.result)
+
+    def is_path_in_collision(self, tf, tf_target, other, tf_other):
+
+        # assert np.sum(np.abs(tf - tf_target)) > 1e-12
+
+        fcl_tf_1 = fcl.Transform(tf[:3, :3], tf[:3, 3])
+        fcl_tf_2 = fcl.Transform(tf_other[:3, :3], tf_other[:3, 3])
+
+        fcl_tf_1_target = fcl.Transform(tf_target[:3, :3], tf_target[:3, 3])
+
+        o1 = fcl.CollisionObject(self.fcl_shape, fcl_tf_1)
+        o2 = fcl.CollisionObject(other.fcl_shape, fcl_tf_2)
+
+        self.c_req.ccd_motion_type = fcl.CCDMotionType.CCDM_LINEAR
+
+        fcl.continuousCollide(o1, fcl_tf_1_target, o2, fcl_tf_2, self.c_req, self.c_res)
+        return self.c_res.is_collide
 
     def get_empty_plot_lines(self, ax, *arg, **kwarg):
         """ Create empty lines to initialize an animation """
@@ -89,6 +108,8 @@ class Box(Shape):
         self.fcl_shape = fcl.Box(dx, dy, dz)
         self.request = fcl.CollisionRequest()
         self.result = fcl.CollisionResult()
+        self.c_req = fcl.ContinuousCollisionRequest()
+        self.c_res = fcl.ContinuousCollisionResult()
 
     def get_vertices(self, tf):
         v = np.zeros((8, 3))

@@ -176,6 +176,16 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
                     return True
         return False
 
+    @staticmethod
+    def _linear_interpolation_path(q_start, q_goal, max_q_step):
+        q_start, q_goal = np.array(q_start), np.array(q_goal)
+
+        q_diff = np.linalg.norm(q_goal - q_start)
+        num_steps = int(np.ceil(q_diff / max_q_step))
+
+        S = np.linspace(0, 1, num_steps)
+        return [(1 - s) * q_start + s * q_goal for s in S]
+
     def is_in_self_collision(self, q):
         geom_links = [l.geometry for l in self.links]
         tf_links = self.fk_all_links(q)
@@ -208,6 +218,48 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
 
         if self.do_check_self_collision:
             if self._check_self_collision(tf_links, geom_links):
+                return True
+        return False
+
+    def is_path_in_collision(self, q_start, q_goal, scene, max_q_step=0.1):
+        """ Check for collision with linear interpolation between start and goal.
+        """
+        for q in self._linear_interpolation_path(q_start, q_goal, max_q_step):
+            if self.is_in_collision(q, scene):
+                return True
+        return False
+
+    def is_path_in_collision_2(self, q_start, q_goal, collection: ShapeSoup):
+        """ Check for collision using the continuous collision checking
+        stuff from fcl.
+        - We do not check for self collision on a path.
+        - Base is assumed not to move.
+        """
+        geom_links = [l.geometry for l in self.links]
+        tf_links = self.fk_all_links(q_start)
+        tf_links_target = self.fk_all_links(q_goal)
+
+        # check collision with tool first
+        if self.geometry_tool is not None:
+            if self.geometry_tool.is_path_in_collision(
+                tf_links[-1], tf_links_target[-1], collection
+            ):
+                return True
+
+        # Base is assumed to be always fixed
+        base = self.geometry_base
+        if base is not None:
+            if base.is_in_collision(collection, tf_self=self.tf_base):
+                return True
+
+        # check collision for all links
+        for i in self.collision_priority:
+            if geom_links[i].is_path_in_collision(
+                tf_links[i], tf_links_target[i], collection
+            ):
+                # move current index to front of priority list
+                self.collision_priority.remove(i)
+                self.collision_priority.insert(0, i)
                 return True
         return False
 
