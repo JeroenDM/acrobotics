@@ -27,10 +27,13 @@ class PlanarArm(Robot):
     """ Robot defined on page 69 in book Siciliano """
 
     def __init__(self, a1=1, a2=1, a3=1):
+        tf1 = translation(-a1 / 2, 0, 0)
+        tf2 = translation(-a2 / 2, 0, 0)
+        tf3 = translation(-a3 / 2, 0, 0)
         geometry = [
-            ShapeSoup([Box(a1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(a2, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(a3, 0.1, 0.1)], [np.eye(4)]),
+            ShapeSoup([Box(a1, 0.1, 0.1)], [tf1]),
+            ShapeSoup([Box(a2, 0.1, 0.1)], [tf2]),
+            ShapeSoup([Box(a3, 0.1, 0.1)], [tf3]),
         ]
         super().__init__(
             [
