@@ -1,5 +1,7 @@
 numpy
 matplotlib
+scipy
+urdfpy
 acrolib
 python-fcl
 casadi
