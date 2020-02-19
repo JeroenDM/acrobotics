@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot name="kingpin" xmlns:xacro="http://wiki.ros.org/xacro">
+<link name="world"/>
+
+<material name="green">
+    <color rgba="0 0.8 0 1.0"/>
+</material>
+
+
+<link name="u_profile">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.7 0.1"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.7 0.1"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_u_profile" type="fixed">
+  <parent link="world"/>
+  <child link="u_profile"/>
+  <origin xyz="1.1 0 0.05" rpy="0 0 0" />
+</joint>
+<link name="obstacle">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.0833333333333 0.01"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.0833333333333 0.01"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_obstacle" type="fixed">
+  <parent link="world"/>
+  <child link="obstacle"/>
+  <origin xyz="0.85 0 0.005" rpy="0 0 0" />
+</joint>
+<link name="table">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.7 0.7 0.01"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.7 0.7 0.01"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_table" type="fixed">
+  <parent link="world"/>
+  <child link="table"/>
+  <origin xyz="0.85 0 -0.005" rpy="0 0 0" />
+</joint>
+<link name="side_1">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.1 0.055"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.1 0.055"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_side_1" type="fixed">
+  <parent link="world"/>
+  <child link="side_1"/>
+  <origin xyz="0.85 0.2 0.0275" rpy="0 0 0" />
+</joint>
+<link name="side_2">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.1 0.055"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.1 0.055"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_side_2" type="fixed">
+  <parent link="world"/>
+  <child link="side_2"/>
+  <origin xyz="0.85 -0.2 0.0275" rpy="0 0 0" />
+</joint>
+<link name="u_profile_2">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.7 0.1"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.2 0.7 0.1"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_u_profile_2" type="fixed">
+  <parent link="world"/>
+  <child link="u_profile_2"/>
+  <origin xyz="0.6 0 0.05" rpy="0 0 0" />
+</joint>
+
+</robot>
