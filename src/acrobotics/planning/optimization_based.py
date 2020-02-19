@@ -68,7 +68,13 @@ def get_optimal_path(
     s_opts = {"max_iter": max_iters}  # solver options
     opti.solver("ipopt", p_opts, s_opts)
     opti.set_initial(q, q_init)  # 2 3 4 5  converges
-    sol = opti.solve()
+
+    try:
+        sol = opti.solve()
+    except RuntimeError as e:
+        print(e)
+        # return opti object to access debug info
+        return Solution(False, extra_info={"opti": opti})
 
     if sol.stats()["success"]:
         return Solution(True, sol.value(q), sol.value(V))

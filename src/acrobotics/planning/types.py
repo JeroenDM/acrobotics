@@ -38,8 +38,7 @@ class Solution:
         extra_info: dict = None,
     ):
         self.success = success
-        if self.success:
-            self.joint_positions = joint_positions
-            self.path_cost = path_cost
-            self.run_time = run_time
-            self.extra_info = extra_info
+        self.joint_positions = joint_positions
+        self.path_cost = path_cost
+        self.run_time = run_time
+        self.extra_info = extra_info
