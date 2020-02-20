@@ -221,15 +221,17 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
                 return True
         return False
 
-    def is_path_in_collision(self, q_start, q_goal, scene, max_q_step=0.1):
+    def is_path_in_collision_discrete(
+        self, q_start, q_goal, collection, max_q_step=0.1
+    ):
         """ Check for collision with linear interpolation between start and goal.
         """
         for q in self._linear_interpolation_path(q_start, q_goal, max_q_step):
-            if self.is_in_collision(q, scene):
+            if self.is_in_collision(q, collection):
                 return True
         return False
 
-    def is_path_in_collision_2(self, q_start, q_goal, collection: ShapeSoup):
+    def is_path_in_collision(self, q_start, q_goal, collection: ShapeSoup):
         """ Check for collision using the continuous collision checking
         stuff from fcl.
         - We do not check for self collision on a path.
