@@ -2,6 +2,10 @@ import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 
 from acrolib.geometry import xyz_intrinsic_to_rot_mat
+from acrolib.quaternion import Quaternion
+
+from acrobotics.path.tolerance import NoTolerance, SymmetricTolerance, Tolerance
+from acrobotics.path.path_pt import TolEulerPt
 
 # from acrobotics.path import TolerancedNumber, TolEulerPt
 
@@ -205,28 +209,49 @@ def tf_interpolations(tf_a, tf_b, num_points):
     return translations, rotations
 
 
-# def weld_lines_to_path(weld_lines, num_points):
-#     paths = []
-#     for wl in weld_lines:
-#         path = []
-#         for t, r in zip(*tf_interpolations(wl["start"], wl["goal"], num_points)):
-#             rpy = r.as_euler("XYZ")
-#             if len(wl["con"]) > 0:
-#                 con0 = wl["con"][0]
-#                 rpy_tol = []
-#                 for v, lower, upper in zip(rpy, con0["min"], con0["max"]):
-#                     if lower == upper:
-#                         rpy_tol.append(v)
-#                     else:
-#                         rpy_tol.append(TolerancedNumber(lower, upper, v))
-#                 path.append(TolEulerPt(t, rpy_tol))
-#             else:
-#                 path.append(TolEulerPt(t, rpy))
-#         paths.append(path)
-#     return paths
+def cons_list_to_dict(cons):
+    """ Allows us to access constraints py type, instead of using a list index"""
+    new_dict = {}
+    for c in cons:
+        new_dict[c["type"]] = c
+    return new_dict
 
 
-# def import_irl_paths(filepath, num_points=10):
-#     irl_data = parse_file(filepath)
-#     weld_lines = extract_weld_lines(irl_data)
-#     return weld_lines_to_path(weld_lines, num_points)
+def parse_constraints(c):
+    tol = []
+    for lower, upper in zip(c["min"], c["max"]):
+        if lower == upper:
+            tol.append(NoTolerance())
+        else:
+            tol.append(Tolerance(lower, upper, 30))
+    return tol
+
+
+def path_from_weld_lines(wlines, num_points):
+    paths = []
+    for wl in wlines:
+        trans, rots = tf_interpolations(wl["start"], wl["goal"], num_points)
+        constraints = cons_list_to_dict(wl["con"])
+        path = []
+        for p, R in zip(trans, rots):
+            if "xyz" in constraints.keys():
+                pos_tol = parse_constraints(constraints["xyz"])
+            else:
+                pos_tol = [NoTolerance()] * 3
+            if "rpy" in constraints.keys():
+                rot_tol = parse_constraints(constraints["rpy"])
+            else:
+                rot_tol = [NoTolerance()] * 3
+
+            path.append(
+                TolEulerPt(p, Quaternion(matrix=R.as_matrix()), pos_tol, rot_tol)
+            )
+
+        paths.append(path)
+    return paths
+
+
+def import_irl_paths(filepath, num_points=10):
+    irl_data = parse_file(filepath)
+    weld_lines = extract_weld_lines(irl_data)
+    return path_from_weld_lines(weld_lines, num_points)
