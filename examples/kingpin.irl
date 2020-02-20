@@ -4,6 +4,8 @@ pose P1 0.99 -0.15 0 135 0 0
 pose P2 0.99 0.15 0 -135 20 0
 pose P3 0.71 -0.15 0 135 0 0
 pose P4 0.71 0.15 0 -135 -20 0
+pose P5 0.71 -0.15 0 0 -135 90
+pose P6 0.71 0.15 0 0 -135 90
 
 commands
 movej home
@@ -11,6 +13,8 @@ movep P1 con c-weld
 movel P3 con c-weld
 movep P2 con c-weld
 movel P4 con c-weld
+movep P5 con c-weld
+movel P6 con c-weld
 movej home
 
 constraints

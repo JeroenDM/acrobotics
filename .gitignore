@@ -1,3 +1,5 @@
+examples/data/*.txt
+
 #PyCharm
 .idea
 
