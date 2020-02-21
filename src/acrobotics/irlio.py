@@ -51,6 +51,8 @@ def parse_file(filepath):
                 print("File did not start with 'variables' or 'commands'.")
             if line == "":
                 continue
+            if line[0] == "#":
+                continue
             if Commands.SET_REFERENCE in line:
                 _, ref = line.split(" ")
                 try:
