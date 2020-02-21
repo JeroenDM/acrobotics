@@ -217,12 +217,15 @@ def cons_list_to_dict(cons):
     return new_dict
 
 
-def parse_constraints(c):
+def parse_constraints(c, convert_angles=False):
     tol = []
     for lower, upper in zip(c["min"], c["max"]):
         if lower == upper:
             tol.append(NoTolerance())
         else:
+            if convert_angles:
+                lower = np.deg2rad(lower)
+                upper = np.deg2rad(upper)
             tol.append(Tolerance(lower, upper, 30))
     return tol
 
@@ -239,7 +242,7 @@ def path_from_weld_lines(wlines, num_points):
             else:
                 pos_tol = [NoTolerance()] * 3
             if "rpy" in constraints.keys():
-                rot_tol = parse_constraints(constraints["rpy"])
+                rot_tol = parse_constraints(constraints["rpy"], convert_angles=True)
             else:
                 rot_tol = [NoTolerance()] * 3
 
