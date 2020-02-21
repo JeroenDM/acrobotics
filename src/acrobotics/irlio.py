@@ -195,11 +195,16 @@ def extract_weld_lines(irl_data):
     return lines
 
 
-def tf_interpolations(tf_a, tf_b, num_points):
+def tf_interpolations(tf_a, tf_b, max_cart_step):
     """ Linear interpolation between two transform.
 
     Implemented using ugly numpy magic.
     """
+    # calculate the number of discretisation points
+    # only position based for now, but see arf for orientation based version.
+    length = np.linalg.norm(tf_b[:3, 3] - tf_a[:3, 3])
+    num_points = int(np.ceil(length / max_cart_step))
+
     s = np.linspace(0, 1, num_points)
     S = np.repeat(s[:, None], 3, axis=1)
     start_goal = Rotation.from_matrix([tf_a[:3, :3], tf_b[:3, :3]])
@@ -230,10 +235,10 @@ def parse_constraints(c, convert_angles=False):
     return tol
 
 
-def path_from_weld_lines(wlines, num_points):
+def path_from_weld_lines(wlines, max_cart_step):
     paths = []
     for wl in wlines:
-        trans, rots = tf_interpolations(wl["start"], wl["goal"], num_points)
+        trans, rots = tf_interpolations(wl["start"], wl["goal"], max_cart_step)
         constraints = cons_list_to_dict(wl["con"])
         path = []
         for p, R in zip(trans, rots):
@@ -254,7 +259,7 @@ def path_from_weld_lines(wlines, num_points):
     return paths
 
 
-def import_irl_paths(filepath, num_points=10):
+def import_irl_paths(filepath, max_cart_step=0.02):
     irl_data = parse_file(filepath)
     weld_lines = extract_weld_lines(irl_data)
-    return path_from_weld_lines(weld_lines, num_points)
+    return path_from_weld_lines(weld_lines, max_cart_step)
