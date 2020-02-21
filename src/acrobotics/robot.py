@@ -134,8 +134,8 @@ class RobotCasadiKinematics(ABC):
 
 
 class Robot(RobotKinematics, RobotCasadiKinematics):
-    def __init__(self, links):
-        super().__init__(links)
+    def __init__(self, links, joint_limits=None):
+        super().__init__(links, joint_limits)
 
         # defaul has no fixed base geometry, no tool and
         self.geometry_base = None
@@ -175,6 +175,12 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
                 ):
                     return True
         return False
+
+    def _is_in_limits(self, q):
+        for qi, limit in zip(q, self.joint_limits):
+            if qi > limit.upper or qi < limit.lower:
+                return False
+        return True
 
     @staticmethod
     def _linear_interpolation_path(q_start, q_goal, max_q_step):

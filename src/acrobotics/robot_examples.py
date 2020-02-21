@@ -1,6 +1,6 @@
 import numpy as np
 
-from .robot import Robot, Tool
+from .robot import Robot, Tool, JointLimit
 from .link import Link, DHLink, JointType
 from .geometry import ShapeSoup
 from .shapes import Box
@@ -165,9 +165,18 @@ class Kuka(Robot):
 
         geoms = [ShapeSoup([shape], [tf]) for shape, tf in zip(s, tfs)]
 
+        jls = [
+            JointLimit(np.deg2rad(-155), np.deg2rad(155)),
+            JointLimit(np.deg2rad(-180), np.deg2rad(65)),
+            JointLimit(np.deg2rad(-15), np.deg2rad(158)),
+            JointLimit(np.deg2rad(-350), np.deg2rad(350)),
+            JointLimit(np.deg2rad(-130), np.deg2rad(130)),
+            JointLimit(np.deg2rad(-350), np.deg2rad(350)),
+        ]
+
         # create robot
         super().__init__(
-            [Link(dh_links[i], JointType.revolute, geoms[i]) for i in range(6)]
+            [Link(dh_links[i], JointType.revolute, geoms[i]) for i in range(6)], jls
         )
         self.arm = Arm2(a1=a1, a2=a2, a3=d4)
         self.wrist = SphericalWrist(d3=d6)
