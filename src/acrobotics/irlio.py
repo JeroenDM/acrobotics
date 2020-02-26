@@ -224,7 +224,7 @@ def cons_list_to_dict(cons):
     return new_dict
 
 
-def parse_constraints(c, convert_angles=False):
+def parse_constraints(c, dist_res, ang_res, angular=False, convert_angles=False):
     tol = []
     for lower, upper in zip(c["min"], c["max"]):
         if lower == upper:
@@ -233,23 +233,50 @@ def parse_constraints(c, convert_angles=False):
             if convert_angles:
                 lower = np.deg2rad(lower)
                 upper = np.deg2rad(upper)
-            tol.append(Tolerance(lower, upper, 30))
+            if angular:
+                num_samples = int(np.ceil((upper - lower) / np.deg2rad(ang_res)))
+            else:
+                num_samples = int(np.ceil((upper - lower) / dist_res))
+            tol.append(Tolerance(lower, upper, num_samples))
     return tol
 
 
-def path_from_weld_lines(wlines, max_cart_step):
+def shrink_path(tf_start, tf_goal, shrink_dist):
+    v = tf_goal[:3, 3] - tf_start[:3, 3]
+    if np.linalg.norm(v) <= 2 * shrink_dist:
+        print("Cannot shrink path because it is too short.")
+        print(f"Path length: {np.linalg.norm(v)} Shrink dist: {shrink_dist}")
+        return tf_start, tf_goal
+    tf_start_s = tf_start.copy()
+    tf_goal_s = tf_goal.copy()
+
+    tf_start_s[:3, 3] += shrink_dist * v
+    tf_goal_s[:3, 3] -= shrink_dist * v
+
+    return tf_start_s, tf_goal_s
+
+
+def path_from_weld_lines(wlines, dist_res, ang_res, shrink_dist):
     paths = []
     for wl in wlines:
-        trans, rots = tf_interpolations(wl["start"], wl["goal"], max_cart_step)
+        if shrink_dist != None:
+            wl["start"], wl["goal"] = shrink_path(wl["start"], wl["goal"], shrink_dist)
+        trans, rots = tf_interpolations(wl["start"], wl["goal"], max_cart_step=dist_res)
         constraints = cons_list_to_dict(wl["con"])
         path = []
         for p, R in zip(trans, rots):
             if "xyz" in constraints.keys():
-                pos_tol = parse_constraints(constraints["xyz"])
+                pos_tol = parse_constraints(constraints["xyz"], dist_res, ang_res)
             else:
                 pos_tol = [NoTolerance()] * 3
             if "rpy" in constraints.keys():
-                rot_tol = parse_constraints(constraints["rpy"], convert_angles=True)
+                rot_tol = parse_constraints(
+                    constraints["rpy"],
+                    dist_res,
+                    ang_res,
+                    angular=True,
+                    convert_angles=True,
+                )
             else:
                 rot_tol = [NoTolerance()] * 3
 
@@ -261,7 +288,18 @@ def path_from_weld_lines(wlines, max_cart_step):
     return paths
 
 
-def import_irl_paths(filepath, max_cart_step=0.02):
+def import_irl_paths(filepath, dist_res=0.02, ang_res=5, shrink_dist=None):
+    """ Create acrobotics path lists from irl file.
+
+    Parameters
+    ----------
+    filename : str
+        Absolute filepath and name.
+    dist_res : float
+        Resolution to discretize path along length and tolerance on position.
+    ang_res : float
+        Resolution IN DEGREES to discretize tolerance on orientation.
+    """
     irl_data = parse_file(filepath)
     weld_lines = extract_weld_lines(irl_data)
-    return path_from_weld_lines(weld_lines, max_cart_step)
+    return path_from_weld_lines(weld_lines, dist_res, ang_res, shrink_dist)
