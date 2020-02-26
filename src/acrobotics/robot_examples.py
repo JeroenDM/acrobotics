@@ -208,6 +208,7 @@ class Kuka(Robot):
                 if sol_wrist.success:
                     for q_wrist in sol_wrist.solutions:
                         solutions.append(np.hstack((q_arm, q_wrist)))
+            # solutions = [qi for qi in solutions if self._is_in_limits(qi)]
             if len(solutions) > 0:
                 return IKResult(True, solutions)
         return IKResult(False)
