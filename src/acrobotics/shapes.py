@@ -186,6 +186,8 @@ class Cylinder(Shape):
         self.fcl_shape = fcl.Cylinder(radius, length)
         self.request = fcl.CollisionRequest()
         self.result = fcl.CollisionResult()
+        self.c_req = fcl.ContinuousCollisionRequest()
+        self.c_res = fcl.ContinuousCollisionResult()
 
     def get_vertices(self, tf):
         v = np.zeros((2 * self.nfac, 3))
