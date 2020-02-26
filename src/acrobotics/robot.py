@@ -150,6 +150,9 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
         # keep track of most likly links to be in collision
         self.collision_priority = list(range(self.ndof))
 
+        # loggers to get performance criteria
+        self.cc_checks = 0
+
     @property
     def tool(self):
         return self.geometry_tool
@@ -198,6 +201,7 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
         return self._check_self_collision(tf_links, geom_links)
 
     def is_in_collision(self, q, collection):
+        self.cc_checks += 1
         if collection is not None:
             geom_links = [l.geometry for l in self.links]
             tf_links = self.fk_all_links(q)
