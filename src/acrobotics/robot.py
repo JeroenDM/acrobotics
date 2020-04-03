@@ -4,7 +4,7 @@ from abc import ABC
 from collections import namedtuple
 from matplotlib import animation
 from typing import List
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 from acrobotics.link import Link
 from acrolib.plotting import plot_reference_frame
 
@@ -19,7 +19,7 @@ class IKResult:
             self.solutions = solutions
 
 
-class Tool(ShapeSoup):
+class Tool(Scene):
     """ Geometric shapes with added atribute tool tip transform tf_tt
      relative to the last link.
     """
@@ -241,7 +241,7 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
                 return True
         return False
 
-    def is_path_in_collision(self, q_start, q_goal, collection: ShapeSoup):
+    def is_path_in_collision(self, q_start, q_goal, collection: Scene):
         """ Check for collision using the continuous collision checking
         stuff from fcl.
         - We do not check for self collision on a path.

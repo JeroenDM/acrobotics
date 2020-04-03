@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from numpy.testing import assert_almost_equal
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 from acrobotics.shapes import Box
 
 tf_identity = np.eye(4)
@@ -23,11 +23,11 @@ def pose_z(alfa, x, y, z):
     )
 
 
-class TestShapeSoup:
+class TestScene:
     def test_polyhedron(self):
         b = Box(1, 2, 3)
         tf = pose_z(0.3, 0.1, 0.2, -0.3)
-        col = ShapeSoup([b], [tf])
+        col = Scene([b], [tf])
         polys = col.get_polyhedrons()
         assert len(polys) == 1
         Aa = np.array(
@@ -40,18 +40,18 @@ class TestShapeSoup:
         assert_almost_equal(polys[0].b, ba)
 
     def test_is_in_collision(self):
-        soup_1 = ShapeSoup([Box(1, 1, 1)], [tf_identity])
-        soup_2 = ShapeSoup([Box(1, 1, 2)], [tf_identity])
+        soup_1 = Scene([Box(1, 1, 1)], [tf_identity])
+        soup_2 = Scene([Box(1, 1, 2)], [tf_identity])
         assert soup_1.is_in_collision(soup_2) == True
 
         assert soup_1.is_in_collision(soup_2, tf_self=tf_far_away) == False
         assert soup_1.is_in_collision(soup_2, tf_other=tf_far_away) == False
 
-        soup_3 = ShapeSoup(
+        soup_3 = Scene(
             [Box(1, 1, 1), Box(0.3, 0.2, 0.1)],
             [pose_z(0.0, -1.0, -1.0, 0.0), -tf_far_away],
         )
-        soup_4 = ShapeSoup(
+        soup_4 = Scene(
             [Box(1, 1, 2), Box(0.3, 0.2, 0.1)],
             [pose_z(np.pi / 4, -2, -2, 0), tf_far_away],
         )
@@ -60,7 +60,7 @@ class TestShapeSoup:
 
     def test_plot(self):
         tf2 = pose_z(np.pi / 6, 9, 0, 0)
-        soup = ShapeSoup([Box(1, 1, 1), Box(2, 2, 0.5)], [tf_identity, tf2])
+        soup = Scene([Box(1, 1, 1), Box(2, 2, 0.5)], [tf_identity, tf2])
 
         fig = plt.figure()
         ax = fig.gca(projection="3d")

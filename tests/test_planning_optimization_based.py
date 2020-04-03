@@ -7,7 +7,7 @@ from acrolib.plotting import get_default_axes3d
 
 from acrobotics.robot import Robot
 from acrobotics.robot_examples import Kuka
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 from acrobotics.shapes import Box
 
 from acrobotics.path.tolerance import NoTolerance, QuaternionTolerance
@@ -39,7 +39,7 @@ def test_complete_problem():
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.12], [0, 0, 0, 1]]
     )
-    scene1 = ShapeSoup([table], [table_tf])
+    scene1 = Scene([table], [table_tf])
 
     robot = Kuka()
     # robot.tool = torch
