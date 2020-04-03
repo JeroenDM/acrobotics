@@ -6,7 +6,7 @@ from numpy.testing import assert_almost_equal
 from acrolib.geometry import pose_x
 from acrobotics.robot import Robot
 from acrobotics.robot_examples import Kuka
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 from acrobotics.shapes import Box
 from .fk_implementations import FKImplementations as fki
 
@@ -27,11 +27,11 @@ class TestCollisionChecking:
     def test_kuka_collision(self):
         bot = Kuka()
         q0 = [0, np.pi / 2, 0, 0, 0, 0]
-        obj1 = ShapeSoup(
+        obj1 = Scene(
             [Box(0.2, 0.3, 0.5), Box(0.1, 0.3, 0.1)],
             [pose_x(0, 0.75, 0, 0.5), pose_x(0, 0.75, 0.5, 0.5)],
         )
-        obj2 = ShapeSoup(
+        obj2 = Scene(
             [Box(0.2, 0.3, 0.5), Box(0.1, 0.3, 0.1)],
             [pose_x(0, 0.3, -0.7, 0.5), pose_x(0, 0.75, 0.5, 0.5)],
         )

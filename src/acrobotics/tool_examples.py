@@ -5,7 +5,7 @@ import numpy as np
 from acrolib.geometry import rot_x, rot_y, rot_z
 
 from .shapes import Box, Cylinder
-from .geometry import ShapeSoup
+from .geometry import Scene
 from .robot import Tool
 
 # ==============================================================================

@@ -3,7 +3,7 @@ from acrolib.geometry import translation, pose_x
 
 from .robot import Robot, Tool, JointLimit
 from .link import Link, DHLink, JointType
-from .geometry import ShapeSoup
+from .geometry import Scene
 from .shapes import Box
 from .inverse_kinematics import spherical_wrist, anthropomorphic_arm, arm_2
 from .inverse_kinematics.ik_result import IKResult
@@ -31,9 +31,9 @@ class PlanarArm(Robot):
         tf2 = translation(-a2 / 2, 0, 0)
         tf3 = translation(-a3 / 2, 0, 0)
         geometry = [
-            ShapeSoup([Box(a1, 0.1, 0.1)], [tf1]),
-            ShapeSoup([Box(a2, 0.1, 0.1)], [tf2]),
-            ShapeSoup([Box(a3, 0.1, 0.1)], [tf3]),
+            Scene([Box(a1, 0.1, 0.1)], [tf1]),
+            Scene([Box(a2, 0.1, 0.1)], [tf2]),
+            Scene([Box(a3, 0.1, 0.1)], [tf3]),
         ]
         super().__init__(
             [
@@ -49,9 +49,9 @@ class SphericalArm(Robot):
 
     def __init__(self, d2=1):
         geometry = [
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
         ]
         super().__init__(
             [
@@ -67,9 +67,9 @@ class SphericalWrist(Robot):
 
     def __init__(self, d3=1):
         geometry = [
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(1, 0.1, 0.1)], [np.eye(4)]),
         ]
         super().__init__(
             [
@@ -91,9 +91,9 @@ class AnthropomorphicArm(Robot):
 
     def __init__(self, a2=1, a3=1):
         geometry = [
-            ShapeSoup([Box(0.3, 0.3, 0.1)], [translation(0, 0, 0.05)]),
-            ShapeSoup([Box(a2, 0.1, 0.1)], [translation(-a2 / 2, 0, 0)]),
-            ShapeSoup([Box(a3, 0.1, 0.1)], [translation(-a3 / 2, 0, 0)]),
+            Scene([Box(0.3, 0.3, 0.1)], [translation(0, 0, 0.05)]),
+            Scene([Box(a2, 0.1, 0.1)], [translation(-a2 / 2, 0, 0)]),
+            Scene([Box(a3, 0.1, 0.1)], [translation(-a3 / 2, 0, 0)]),
         ]
         super().__init__(
             [
@@ -114,9 +114,9 @@ class Arm2(Robot):
 
     def __init__(self, a1=1, a2=1, a3=1):
         geometry = [
-            ShapeSoup([Box(a1, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(a2, 0.1, 0.1)], [np.eye(4)]),
-            ShapeSoup([Box(a3, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(a1, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(a2, 0.1, 0.1)], [np.eye(4)]),
+            Scene([Box(a3, 0.1, 0.1)], [np.eye(4)]),
         ]
         super().__init__(
             [
@@ -163,7 +163,7 @@ class Kuka(Robot):
             DHLink(0, 0, d6, 0),
         ]
 
-        geoms = [ShapeSoup([shape], [tf]) for shape, tf in zip(s, tfs)]
+        geoms = [Scene([shape], [tf]) for shape, tf in zip(s, tfs)]
 
         jls = [
             JointLimit(np.deg2rad(-155), np.deg2rad(155)),
@@ -241,34 +241,30 @@ class KukaOnRail(Robot):
                 Link(
                     DHLink(0, PI / 2, 0, 0),
                     JointType.prismatic,
-                    ShapeSoup([s[0]], [tfs[0]]),
+                    Scene([s[0]], [tfs[0]]),
                 ),
                 Link(
                     DHLink(a1, PI / 2, 0, 0),
                     JointType.revolute,
-                    ShapeSoup([s[1]], [tfs[1]]),
+                    Scene([s[1]], [tfs[1]]),
                 ),
-                Link(
-                    DHLink(a2, 0, 0, 0), JointType.revolute, ShapeSoup([s[2]], [tfs[2]])
-                ),
+                Link(DHLink(a2, 0, 0, 0), JointType.revolute, Scene([s[2]], [tfs[2]])),
                 Link(
                     DHLink(0, PI / 2, 0, 0),
                     JointType.revolute,
-                    ShapeSoup([s[3]], [tfs[3]]),
+                    Scene([s[3]], [tfs[3]]),
                 ),
                 Link(
                     DHLink(0, -PI / 2, d4, 0),
                     JointType.revolute,
-                    ShapeSoup([s[4]], [tfs[4]]),
+                    Scene([s[4]], [tfs[4]]),
                 ),
                 Link(
                     DHLink(0, PI / 2, 0, 0),
                     JointType.revolute,
-                    ShapeSoup([s[5]], [tfs[5]]),
+                    Scene([s[5]], [tfs[5]]),
                 ),
-                Link(
-                    DHLink(0, 0, d6, 0), JointType.revolute, ShapeSoup([s[6]], [tfs[6]])
-                ),
+                Link(DHLink(0, 0, d6, 0), JointType.revolute, Scene([s[6]], [tfs[6]])),
             ]
         )
         self.kuka = Kuka(a1=0.18, a2=0.6, d4=0.62, d6=0.115)

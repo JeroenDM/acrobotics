@@ -5,7 +5,7 @@ import casadi as ca
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 from acrobotics.shapes import Box
 from numpy.testing import assert_almost_equal
 
@@ -76,7 +76,7 @@ class TestLinkKinematics:
 class TestLink:
     def test_init(self):
         dh_params = DHLink(0.1, np.pi / 4, -0.1, np.pi / 6)
-        geometry = ShapeSoup([Box(1, 2, 3)], [np.eye(4)])
+        geometry = Scene([Box(1, 2, 3)], [np.eye(4)])
         link1 = Link(dh_params, JointType.revolute, geometry)
 
         fig = plt.figure()

@@ -4,7 +4,7 @@ from acrobotics.shapes import Shape, Box, Polyhedron
 from typing import List
 
 
-class ShapeSoup:
+class Scene:
     """ Group Shapes and transforms expressed in a common world frame.
     This is used to create more complicated objects that just a box.
     """
@@ -69,13 +69,3 @@ class ShapeSoup:
                 if shape1.is_path_in_collision(tf1, tf1_target, shape2, tf2):
                     return True
         return False
-
-
-class Scene(ShapeSoup):
-    """ ShapeSoup was a bad name, refactor once ready.
-    Scene is also not perfect as a scene can be part of
-    a robot link, wich sounds strange.
-    ShapeGroup?
-    """
-
-    pass
