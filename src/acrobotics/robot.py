@@ -6,7 +6,7 @@ from matplotlib import animation
 from typing import List
 from acrobotics.geometry import ShapeSoup
 from acrobotics.link import Link
-from acrobotics.util import plot_reference_frame
+from acrolib.plotting import plot_reference_frame
 
 JointLimit = namedtuple("JointLimit", ["lower", "upper"])
 

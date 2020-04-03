@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from numpy.testing import assert_almost_equal
+from acrolib.geometry import pose_x
 from acrobotics.robot_examples import (
     PlanarArm,
     SphericalArm,
@@ -12,7 +13,6 @@ from acrobotics.robot_examples import (
     KukaOnRail,
 )
 from .fk_implementations import FKImplementations as fki
-from acrobotics.util import pose_x
 from acrobotics.tool_examples import torch
 
 PI = np.pi

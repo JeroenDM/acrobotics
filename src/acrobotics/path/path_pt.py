@@ -4,9 +4,14 @@ from abc import ABC, abstractmethod
 
 from acrolib.sampling import Sampler, SampleMethod
 from acrolib.quaternion import Quaternion
+from acrolib.geometry import (
+    rpy_to_rot_mat,
+    rotation_matrix_to_rpy,
+    tf_inverse,
+    quat_distance,
+)
 
 from acrobotics.robot import Robot
-from acrobotics.geometry import ShapeSoup
 
 from .sampling import SamplingSetting, SearchStrategy
 
@@ -15,11 +20,7 @@ from .path_pt_base import Pose, PathPt
 
 from .util import (
     create_grid,
-    xyz_intrinsic_to_rot_mat,
-    rotation_matrix_to_rxyz,
     check_rxyz_input,
-    tf_inverse,
-    quat_distance,
 )
 
 
@@ -99,13 +100,13 @@ class TolEulerPt(Pose, PathPt):
     def to_transform(self, sample):
         tf = np.eye(4)
         tf[:3, 3] = sample[:3]
-        tf[:3, :3] = self.rotation_matrix @ xyz_intrinsic_to_rot_mat(sample[3:])
+        tf[:3, :3] = self.rotation_matrix @ rpy_to_rot_mat(sample[3:])
         return tf
 
     def transform_to_rel_tolerance_deviation(self, tf):
         """ Convert tf in world frame to position expressed in local path frame. """
         T_rel = tf_inverse(self.transformation_matrix) @ tf
-        rxyz = rotation_matrix_to_rxyz(T_rel[:3, :3])
+        rxyz = rotation_matrix_to_rpy(T_rel[:3, :3])
         rxyz = np.array(rxyz)
         return np.hstack((T_rel[:3, 3], rxyz))
 

@@ -8,14 +8,13 @@ import fcl
 import numpy as np
 import matplotlib.pyplot as plt
 
-from acrobotics.util import get_default_axes3d, plot_reference_frame
+from acrolib.plotting import get_default_axes3d, plot_reference_frame
+from acrolib.geometry import translation
 
 from acrobotics.robot_examples import Kuka
 from acrobotics.tool_examples import torch2
 from acrobotics.geometry import Scene
 from acrobotics.shapes import Box
-
-from acrobotics.util import translation
 
 robot = Kuka()
 robot.tool = torch2

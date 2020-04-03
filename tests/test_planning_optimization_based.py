@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 from acrolib.quaternion import Quaternion
 from acrolib.sampling import SampleMethod
+from acrolib.plotting import get_default_axes3d
 
-from acrobotics.util import get_default_axes3d
 from acrobotics.robot import Robot
 from acrobotics.robot_examples import Kuka
 from acrobotics.geometry import ShapeSoup

@@ -3,7 +3,7 @@ import numpy as np
 from numpy.random import uniform
 
 from acrobotics.shapes import Box
-from acrobotics.util import pose_x
+from acrolib.geometry import pose_x
 
 box1 = Box(1, 0.5, 2)
 box2 = Box(0.7, 1.5, 1)

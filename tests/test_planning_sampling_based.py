@@ -6,12 +6,12 @@ from numpy.testing import assert_almost_equal
 
 from acrolib.quaternion import Quaternion
 from acrolib.sampling import SampleMethod
+from acrolib.plotting import get_default_axes3d, plot_reference_frame
 
 from acrobotics.shapes import Box
 from acrobotics.geometry import Scene
 from acrobotics.robot import Robot
 from acrobotics.robot_examples import Kuka
-from acrobotics.util import get_default_axes3d, plot_reference_frame
 from acrobotics.path.sampling import SamplingSetting, SearchStrategy
 from acrobotics.path.tolerance import (
     NoTolerance,
@@ -295,4 +295,3 @@ def test_exceptions():
     with pytest.raises(Exception) as e:
         solve(setup2, solve_set2)
     assert str(e.value) == f"No valid joint solutions for path point {0}."
-

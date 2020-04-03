@@ -8,7 +8,7 @@ from acrobotics.robot_examples import (
     Kuka,
     KukaOnRail,
 )
-from acrobotics.util import pose_x
+from acrolib.geometry import pose_x
 
 PI = np.pi
 
