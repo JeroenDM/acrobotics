@@ -101,7 +101,7 @@ print([robot.is_in_collision(q, scene) for q in q_path])
 `robot.animate_path(figure_handle, axes_handle, joint_path)`
 
 ```python
-from acrobotics.util import get_default_axes3d
+from acrolib.plotting import get_default_axes3d
 
 fig, ax = get_default_axes3d()
 

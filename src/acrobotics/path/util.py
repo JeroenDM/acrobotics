@@ -1,31 +1,5 @@
 import numpy as np
 
-from acrolib.quaternion import Quaternion
-
-from acrobotics.util import rot_x, rot_y, rot_z
-
-
-def quat_distance(qa: Quaternion, qb: Quaternion):
-    """ Half of the rotation angle to bring qa to qb."""
-    return np.arccos(np.abs(qa.elements @ qb.elements))
-
-
-def tf_inverse(T):
-    """ Efficient inverse of a homogenous transform.
-
-    (Normal matrix inversion would be a bad idea.)
-    Returns a copy, not inplace!
-    """
-    Ti = np.eye(4)
-    Ti[:3, :3] = T[:3, :3].transpose()
-    Ti[:3, 3] = np.dot(-Ti[:3, :3], T[:3, 3])
-    return Ti
-
-
-def xyz_intrinsic_to_rot_mat(rxyz):
-    r_x, r_y, r_z = rxyz[0], rxyz[1], rxyz[2]
-    return rot_x(r_x) @ rot_y(r_y) @ rot_z(r_z)
-
 
 def is_in_range(x, lower, upper):
     if x > upper or x < lower:
@@ -44,18 +18,6 @@ def check_rxyz_input(rxyz):
     if not is_in_range(rxyz[2], -np.pi, np.pi):
         return False
     return True
-
-
-def rotation_matrix_to_rxyz(R):
-    r11, r12, r13 = R[0]
-    r21, r22, r23 = R[1]
-    r31, r32, r33 = R[2]
-
-    r_x = np.arctan2(-r23, r33)
-    r_y = np.arctan2(r13, np.sqrt(r11 ** 2 + r12 ** 2))
-    r_z = np.arctan2(-r12, r11)
-
-    return [r_x, r_y, r_z]
 
 
 def create_grid(r):

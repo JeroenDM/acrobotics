@@ -21,7 +21,7 @@ from acrobotics.shapes import Box
 
 # A transform matrix is represented by a 4x4 numpy array
 # Here we create one using a helper function for readability
-from acrobotics.util import translation
+from acrolib.geometry import translation
 
 table = Box(2, 2, 0.1)
 T_table = translation(0, 0, -0.2)
@@ -62,7 +62,7 @@ for q in ik_solution.solutions:
 # Animate path and planning scene
 # ======================================================
 import matplotlib.pyplot as plt
-from acrobotics.util import get_default_axes3d
+from acrolib.plotting import get_default_axes3d
 
 fig, ax = get_default_axes3d([-0.8, 0.8], [-0.8, 0.8], [-0.2, 1.4])
 ax.set_axis_off()

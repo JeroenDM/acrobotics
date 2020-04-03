@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
 from numpy.testing import assert_almost_equal
+from acrolib.geometry import rot_z, rot_y
 
 from acrobotics.shapes import Box, Cylinder
-from acrobotics.util import rot_z, rot_y
 
 
 tf_identity = np.eye(4)
@@ -245,4 +245,3 @@ class TestCylinder:
 
         # plt.show(block=True)
         assert True
-

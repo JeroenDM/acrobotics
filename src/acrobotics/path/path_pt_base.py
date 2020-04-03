@@ -6,7 +6,7 @@ from acrolib.sampling import Sampler, SampleMethod
 from acrolib.quaternion import Quaternion
 
 from acrobotics.robot import Robot
-from acrobotics.geometry import ShapeSoup
+from acrobotics.geometry import Scene
 
 from .sampling import SamplingSetting, SearchStrategy
 from .tolerance import Tolerance, NoTolerance, SymmetricTolerance, QuaternionTolerance
@@ -85,7 +85,7 @@ class PathPt(ABC):
         return joint_solutions
 
     def to_joint_solutions(
-        self, robot: Robot, settings: SamplingSetting, scene: ShapeSoup = None
+        self, robot: Robot, settings: SamplingSetting, scene: Scene = None
     ) -> np.ndarray:
         """ Return all joint positions that satisfy the constraints."""
 
@@ -110,7 +110,7 @@ class PathPt(ABC):
 
         return np.array(collision_free_js)
 
-    def _incremental_search(self, robot: Robot, scene: ShapeSoup, s: SamplingSetting):
+    def _incremental_search(self, robot: Robot, scene: Scene, s: SamplingSetting):
         joint_solutions = []
         for _ in range(s.max_search_iters):
 

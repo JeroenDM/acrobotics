@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 
-from acrolib.geometry import xyz_intrinsic_to_rot_mat
+from acrolib.geometry import rpy_to_rot_mat
 from acrolib.quaternion import Quaternion
 
 from acrobotics.path.tolerance import NoTolerance, SymmetricTolerance, Tolerance
@@ -96,10 +96,10 @@ def parse_rotation(values):
         raise NotImplementedError("Quaterion input not supported yet.")
     elif len(values) == 3:
         if guess_degree_or_radians(values) == "rad":
-            return xyz_intrinsic_to_rot_mat(values)
+            return rpy_to_rot_mat(values)
         else:
             values = [v * np.pi / 180 for v in values]
-            return xyz_intrinsic_to_rot_mat(values)
+            return rpy_to_rot_mat(values)
     else:
         raise ValueError(
             "Wrong number of values for the rotation: {}".format(str(values))

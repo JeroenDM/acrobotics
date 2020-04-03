@@ -4,6 +4,7 @@ from numpy.testing import assert_almost_equal
 
 from acrolib.quaternion import Quaternion
 from acrolib.sampling import SampleMethod
+from acrolib.geometry import rotation_matrix_to_rpy
 
 from acrobotics.robot import Robot, IKResult
 
@@ -17,7 +18,6 @@ from acrobotics.path.tolerance import (
 from acrobotics.path.path_pt_base import PathPt
 from acrobotics.path.path_pt import TolEulerPt, TolPositionPt, TolQuatPt
 from acrobotics.path.sampling import SamplingSetting, SearchStrategy
-from acrobotics.path.util import rotation_matrix_to_rxyz
 
 IK_RESULT = IKResult(True, [np.ones(6), 2 * np.ones(6)])
 
@@ -147,7 +147,7 @@ class TestEulerPt:
 
         tf_samples = pt.sample_incremental(10, SampleMethod.random_uniform)
 
-        euler = [rotation_matrix_to_rxyz(tf[:3, :3]) for tf in tf_samples]
+        euler = [rotation_matrix_to_rpy(tf[:3, :3]) for tf in tf_samples]
 
         for i in range(10):
             assert_almost_equal(euler[i][0], 0)
