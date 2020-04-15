@@ -1,3 +1,16 @@
+"""
+Demo based on a random bin-picking application.
+
+Plan a path to a Task space pose inside a bin.
+Formulate it as a non-linear optimization problem using casadi.
+
+Add collision constraints as explained in the paper:
+"Time-Optimal Path Following for Robots
+with Object Collision Avoidance using Lagrangian Duality"
+By Debrouwere et al.
+
+Also, I'm sorry acrobotics requires so much import statements.
+"""
 import numpy as np
 
 # ======================================================
@@ -10,19 +23,17 @@ from acrobotics.robot import Tool
 from acrolib.geometry import translation, pose_y
 from acrobotics.urdfio import import_urdf
 
-# create the robot
-robot = Kuka()
 vacuum_tool = Tool(
     [Cylinder(0.025, 0.15)], [translation(0, 0, 0.075)], translation(0, 0, 0.15)
 )
+
+robot = Kuka()
 robot.tool = vacuum_tool
 robot.tf_base = translation(0, 0, 0.1)
 
-# load the bin model from a file and move it in the right place
 scene = import_urdf("examples/bin.urdf")
 scene.translate(0.1, -0.7, -0.025)
 
-# add a nice table to the whole setup
 table = Box(1.2, 1.2, 0.05)
 T_table = translation(0.4, -0.3, -0.04)
 scene.add([table], [T_table])
@@ -43,10 +54,9 @@ else:
 
 
 q_start = np.array([0.5, 1.5, -0.3, 0, 0, 0])
-# q_goal = np.array([-2.5, 1.5, 0.3, 0, 0, 0])
-q_goals = ik_sol.solutions
 
-# T_goal = robot.fk(q_goal)
+# we could use the ik solutions as configuration space goals
+q_goals = ik_sol.solutions
 
 # ======================================================
 # Setup optimization problem
@@ -76,8 +86,10 @@ opti.subject_to(create_cc(opti, robot, scene, q))
 
 opti.solver("ipopt")
 
+# I selected a specific configuration to setup an initial guess
+# This is not ideal, but the solver does not converge without it
 q_path_init = np.linspace(q_start, q_goals[2], N)
-# opti.set_initial(q, q_path_init)
+opti.set_initial(q, q_path_init)
 
 # ======================================================
 # Solve optimization problem
@@ -89,8 +101,14 @@ except RuntimeError as e:
     print(e)
     q_sol = opti.debug.value(q)
 
+# check if to robot is indeed not in collision along the path
+# it turns out this is not always the case, so there is an unkown
+# issue with the collision constraints
 print([robot.is_in_collision(q, scene) for q in q_sol])
+
+# we can also visualize the initial guess
 # q_sol = np.linspace(q_start, q_goals[2], N)
+
 # ======================================================
 # Animate path and planning scene
 # ======================================================
@@ -102,10 +120,9 @@ ax.set_axis_off()
 ax.view_init(elev=31, azim=-15)
 
 plot_reference_frame(ax, tf=T_pick, arrow_length=0.4)
-
 scene.plot(ax, c="green")
 robot.animate_path(fig, ax, q_sol)
-robot.plot_kinematics(ax, q_start, c="k")
+# robot.plot_kinematics(ax, q_start, c="k")
 
 # robot.animation.save("examples/robot_animation.gif", writer="imagemagick", fps=10)
 plt.show()
