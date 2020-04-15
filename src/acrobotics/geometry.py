@@ -31,6 +31,16 @@ class Scene:
     def shapes(self):
         return self.s
 
+    def add(self, shapes: List[Shape], tf_shapes: List[np.ndarray]):
+        """ Add new shapes to the scene, inputs are lists. """
+        self.s.extend(shapes)
+        self.tf_s.extend(tf_shapes)
+
+    def translate(self, x, y, z):
+        """ Move all shapes in this scene relative to their current position. """
+        for tf in self.tf_s:
+            tf[:3, 3] += np.array([x, y, z])
+
     def get_polyhedrons(self):
         polys = []
         for s, tf in zip(self.s, self.tf_s):
