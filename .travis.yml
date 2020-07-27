@@ -39,6 +39,7 @@ install:
 
 script:
 - pytest --cov-report term --cov=$PACKAGENAME
+- python examples/getting_started.py
 
 after_success:
 - codecov
