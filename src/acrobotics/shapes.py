@@ -3,6 +3,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 from collections import namedtuple
+from trimesh import Trimesh
 
 
 def transform_vector(tf, vector):
@@ -266,3 +267,10 @@ class Cylinder(Shape):
         b[-1] = -self.l / 2
         b = b + A @ tf[:3, 3]
         return Polyhedron(A, b)
+
+
+def Mesh(Shape):
+    """ Wrapper of Trimesh objects. """
+
+    def __init__(self, mesh: Trimesh):
+        self.trimesh = mesh
