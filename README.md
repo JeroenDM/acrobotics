@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/JeroenDM/acrobotics.svg?branch=master)](https://travis-ci.org/JeroenDM/acrobotics) [![codecov](https://codecov.io/gh/JeroenDM/acrobotics/branch/master/graph/badge.svg)](https://codecov.io/gh/JeroenDM/acrobotics)
+[![Build Status](https://travis-ci.org/JeroenDM/acrobotics.svg?branch=master)](https://travis-ci.org/JeroenDM/acrobotics) [![codecov](https://codecov.io/gh/JeroenDM/acrobotics/branch/master/graph/badge.svg)](https://codecov.io/gh/JeroenDM/acrobotics) [![PyPI version](https://badge.fury.io/py/acrobotics.svg)](https://badge.fury.io/py/acrobotics)
 
 # Acrobotics
 
