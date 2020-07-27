@@ -80,9 +80,9 @@ class Shape(ABC):
         """ Update existing lines on a plot using the given transform tf"""
         edges = self.get_edges(tf)
         for i, l in enumerate(lines):
-            x = [edges[i, 0], edges[i, 3]]
-            y = [edges[i, 1], edges[i, 4]]
-            z = [edges[i, 2], edges[i, 5]]
+            x = np.array([edges[i, 0], edges[i, 3]])
+            y = np.array([edges[i, 1], edges[i, 4]])
+            z = np.array([edges[i, 2], edges[i, 5]])
             l.set_data(x, y)
             l.set_3d_properties(z)
         return lines
