@@ -56,7 +56,7 @@ class TestIK:
             resi = bot.ik(T1)
             for q_sol in resi.solutions:
                 R2 = bot.fk(q_sol)[:3, :3]
-                assert_almost_equal(T1[:3, :3], R2)
+                assert_almost_equal(T1[:3, :3], R2, decimal=5)
 
     def test_arm2_random(self):
         bot = Arm2()
@@ -165,7 +165,7 @@ class TestIK:
             else:
                 # somethings is wrong, should be reachable
                 print(resi)
-                assert_almost_equal(qi, 0)
+                assert_almost_equal(qi, 0, decimal=6)
 
     def test_kuka_on_rail_tool_random(self):
         bot = KukaOnRail()
@@ -184,4 +184,4 @@ class TestIK:
             else:
                 # somethings is wrong, should be reachable
                 print(resi)
-                assert_almost_equal(qi, 0)
+                assert_almost_equal(qi, 0, decimal=6)
