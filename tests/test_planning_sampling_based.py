@@ -1,29 +1,14 @@
 import pytest
 import numpy as np
-from numpy.testing import assert_almost_equal
+import acrobotics as ab
 
 # import matplotlib.pyplot as plt
 
+from numpy.testing import assert_almost_equal
 from acrolib.quaternion import Quaternion
 from acrolib.sampling import SampleMethod
 from acrolib.plotting import get_default_axes3d, plot_reference_frame
-
-from acrobotics.shapes import Box
-from acrobotics.geometry import Scene
 from acrobotics.robot import Robot
-from acrobotics.robot_examples import Kuka
-from acrobotics.path.sampling import SamplingSetting, SearchStrategy
-from acrobotics.path.tolerance import (
-    NoTolerance,
-    Tolerance,
-    QuaternionTolerance,
-    SymmetricTolerance,
-)
-from acrobotics.path.factory import create_line, create_arc
-from acrobotics.path.path_pt import TolPositionPt, TolEulerPt, TolQuatPt
-from acrobotics.planning.solver import solve
-from acrobotics.planning.types import SolveMethod, CostFuntionType, PlanningSetup
-from acrobotics.planning.settings import SolverSettings
 
 
 class DummyRobot(Robot):
@@ -47,29 +32,29 @@ def test_tol_quat_pt_with_weights():
         yi = s * 0.2 + (1 - s) * (-0.2)
         zi = 0.2
         path_ori_free.append(
-            TolQuatPt(
+            ab.TolQuatPt(
                 [xi, yi, zi],
                 Quaternion(axis=[1, 0, 0], angle=np.pi),
-                [NoTolerance(), NoTolerance(), NoTolerance()],
-                QuaternionTolerance(2.0),
+                [ab.NoTolerance(), ab.NoTolerance(), ab.NoTolerance()],
+                ab.QuaternionTolerance(2.0),
             )
         )
 
-    table = Box(0.5, 0.5, 0.1)
+    table = ab.Box(0.5, 0.5, 0.1)
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.12], [0, 0, 0, 1]]
     )
-    scene1 = Scene([table], [table_tf])
+    scene1 = ab.Scene([table], [table_tf])
 
-    robot = Kuka()
+    robot = ab.Kuka()
     # robot.tool = torch
-    setup = PlanningSetup(robot, path_ori_free, scene1)
+    setup = ab.PlanningSetup(robot, path_ori_free, scene1)
 
     # weights to express the importance of the joints in the cost function
     joint_weights = [10.0, 5.0, 1.0, 1.0, 1.0, 1.0]
 
-    settings = SamplingSetting(
-        SearchStrategy.INCREMENTAL,
+    settings = ab.SamplingSetting(
+        ab.SearchStrategy.INCREMENTAL,
         sample_method=SampleMethod.random_uniform,
         num_samples=500,
         iterations=2,
@@ -77,13 +62,13 @@ def test_tol_quat_pt_with_weights():
         weights=joint_weights,
     )
 
-    solve_set = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.weighted_sum_squared,
+    solve_set = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.weighted_sum_squared,
         sampling_settings=settings,
     )
 
-    sol = solve(setup, solve_set)
+    sol = ab.solve(setup, solve_set)
     assert sol.success
 
     for qi, s in zip(sol.joint_positions, np.linspace(0, 1, 3)):
@@ -102,36 +87,36 @@ def test_tol_quat_pt_with_weights():
 
 
 def test_tol_position_pt_planning_problem():
-    robot = Kuka()
+    robot = ab.Kuka()
 
-    table = Box(0.5, 0.5, 0.1)
+    table = ab.Box(0.5, 0.5, 0.1)
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.12], [0, 0, 0, 1]]
     )
-    scene1 = Scene([table], [table_tf])
+    scene1 = ab.Scene([table], [table_tf])
 
     # create path
     quat = Quaternion(axis=np.array([1, 0, 0]), angle=np.pi)
-    tolerance = [NoTolerance(), SymmetricTolerance(0.05, 10), NoTolerance()]
-    first_point = TolPositionPt(np.array([0.9, -0.2, 0.2]), quat, tolerance)
+    tolerance = [ab.NoTolerance(), ab.SymmetricTolerance(0.05, 10), ab.NoTolerance()]
+    first_point = ab.TolPositionPt(np.array([0.9, -0.2, 0.2]), quat, tolerance)
     # end_position = np.array([0.9, 0.2, 0.2])
 
     # path = create_line(first_point, end_position, 5)
-    path = create_arc(
+    path = ab.create_arc(
         first_point, np.array([0.9, 0.0, 0.2]), np.array([0, 0, 1]), 2 * np.pi, 5
     )
 
-    planner_settings = SamplingSetting(SearchStrategy.GRID, iterations=1)
+    planner_settings = ab.SamplingSetting(ab.SearchStrategy.GRID, iterations=1)
 
-    solver_settings = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+    solver_settings = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.sum_squared,
         sampling_settings=planner_settings,
     )
 
-    setup = PlanningSetup(robot, path, scene1)
+    setup = ab.PlanningSetup(robot, path, scene1)
 
-    sol = solve(setup, solver_settings)
+    sol = ab.solve(setup, solver_settings)
     assert sol.success
 
     for qi, pt in zip(sol.joint_positions, path):
@@ -148,45 +133,45 @@ def test_tol_position_pt_planning_problem():
 
 # TODO fix this test
 def test_euler_pt_planning_problem():
-    robot = Kuka()
+    robot = ab.Kuka()
 
-    table = Box(0.5, 0.5, 0.1)
+    table = ab.Box(0.5, 0.5, 0.1)
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.00], [0, 0, 0, 1]]
     )
-    scene1 = Scene([table], [table_tf])
+    scene1 = ab.Scene([table], [table_tf])
 
     # create path
     quat = Quaternion(axis=np.array([1, 0, 0]), angle=-3 * np.pi / 4)
 
-    pos_tol = 3 * [NoTolerance()]
+    pos_tol = 3 * [ab.NoTolerance()]
     # rot_tol = 3 * [NoTolerance()]
     rot_tol = [
-        NoTolerance(),
-        SymmetricTolerance(np.pi / 4, 20),
-        SymmetricTolerance(np.pi, 20),
+        ab.NoTolerance(),
+        ab.SymmetricTolerance(np.pi / 4, 20),
+        ab.SymmetricTolerance(np.pi, 20),
     ]
-    first_point = TolEulerPt(np.array([0.9, -0.1, 0.2]), quat, pos_tol, rot_tol)
+    first_point = ab.TolEulerPt(np.array([0.9, -0.1, 0.2]), quat, pos_tol, rot_tol)
     # end_position = np.array([0.9, 0.1, 0.2])
 
     # path = create_line(first_point, end_position, 5)
-    path = create_arc(
+    path = ab.create_arc(
         first_point, np.array([0.9, 0.0, 0.2]), np.array([0, 0, 1]), 2 * np.pi, 5
     )
 
-    planner_settings = SamplingSetting(
-        SearchStrategy.GRID, iterations=1, tolerance_reduction_factor=2
+    planner_settings = ab.SamplingSetting(
+        ab.SearchStrategy.GRID, iterations=1, tolerance_reduction_factor=2
     )
 
-    solver_settings = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+    solver_settings = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.sum_squared,
         sampling_settings=planner_settings,
     )
 
-    setup = PlanningSetup(robot, path, scene1)
+    setup = ab.PlanningSetup(robot, path, scene1)
 
-    sol = solve(setup, solver_settings)
+    sol = ab.solve(setup, solver_settings)
     assert sol.success
 
     # fig, ax = get_default_axes3d()
@@ -209,89 +194,89 @@ def test_euler_pt_planning_problem():
 
 
 def test_state_cost():
-    robot = Kuka()
+    robot = ab.Kuka()
 
-    table = Box(0.5, 0.5, 0.1)
+    table = ab.Box(0.5, 0.5, 0.1)
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.00], [0, 0, 0, 1]]
     )
-    scene1 = Scene([table], [table_tf])
+    scene1 = ab.Scene([table], [table_tf])
 
     # create path
     quat = Quaternion(axis=np.array([1, 0, 0]), angle=-3 * np.pi / 4)
 
-    pos_tol = 3 * [NoTolerance()]
+    pos_tol = 3 * [ab.NoTolerance()]
     # rot_tol = 3 * [NoTolerance()]
     rot_tol = [
-        NoTolerance(),
-        SymmetricTolerance(np.pi / 4, 20),
-        SymmetricTolerance(np.pi, 20),
+        ab.NoTolerance(),
+        ab.SymmetricTolerance(np.pi / 4, 20),
+        ab.SymmetricTolerance(np.pi, 20),
     ]
-    first_point = TolEulerPt(np.array([0.9, -0.1, 0.2]), quat, pos_tol, rot_tol)
+    first_point = ab.TolEulerPt(np.array([0.9, -0.1, 0.2]), quat, pos_tol, rot_tol)
     # end_position = np.array([0.9, 0.1, 0.2])
 
     # path = create_line(first_point, end_position, 5)
-    path = create_arc(
+    path = ab.create_arc(
         first_point, np.array([0.9, 0.0, 0.2]), np.array([0, 0, 1]), 2 * np.pi, 5
     )
 
-    planner_settings = SamplingSetting(
-        SearchStrategy.GRID,
+    planner_settings = ab.SamplingSetting(
+        ab.SearchStrategy.GRID,
         iterations=1,
         tolerance_reduction_factor=2,
         use_state_cost=True,
         state_cost_weight=10.0,
     )
 
-    solver_settings = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+    solver_settings = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.sum_squared,
         sampling_settings=planner_settings,
     )
 
-    setup = PlanningSetup(robot, path, scene1)
+    setup = ab.PlanningSetup(robot, path, scene1)
 
-    sol = solve(setup, solver_settings)
+    sol = ab.solve(setup, solver_settings)
     assert sol.success
 
 
 def test_exceptions():
-    settings = SamplingSetting(
-        SearchStrategy.INCREMENTAL,
+    settings = ab.SamplingSetting(
+        ab.SearchStrategy.INCREMENTAL,
         sample_method=SampleMethod.random_uniform,
         num_samples=500,
         iterations=2,
         tolerance_reduction_factor=2,
     )
 
-    solve_set = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.weighted_sum_squared,
+    solve_set = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.weighted_sum_squared,
         sampling_settings=settings,
     )
 
-    setup = PlanningSetup(None, None, None)
+    setup = ab.PlanningSetup(None, None, None)
     with pytest.raises(Exception) as e:
-        solve(setup, solve_set)
+        ab.solve(setup, solve_set)
     assert (
         str(e.value)
         == "No weights specified in SamplingSettings for the weighted cost function."
     )
 
-    robot = Kuka()
-    scene = Scene([], [])
+    robot = ab.Kuka()
+    scene = ab.Scene([], [])
 
     pos = np.array([1000, 0, 0])
     quat = Quaternion(axis=np.array([1, 0, 0]), angle=-3 * np.pi / 4)
-    path = [TolPositionPt(pos, quat, 3 * [NoTolerance()])]
+    path = [ab.TolPositionPt(pos, quat, 3 * [ab.NoTolerance()])]
 
-    solve_set2 = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+    solve_set2 = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.sum_squared,
         sampling_settings=settings,
     )
 
-    setup2 = PlanningSetup(robot, path, scene)
+    setup2 = ab.PlanningSetup(robot, path, scene)
     with pytest.raises(Exception) as e:
-        solve(setup2, solve_set2)
+        ab.solve(setup2, solve_set2)
     assert str(e.value) == f"No valid joint solutions for path point {0}."
