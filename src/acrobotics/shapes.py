@@ -6,7 +6,9 @@ from collections import namedtuple
 
 
 def transform_vector(tf, vector):
-    """ Transform a vector with a homogeneous transform matrix tf. """
+    """ Transform a vector with a homogeneous transform matrix tf.
+    TODO move this to acrolib.geometry or acrobotics.util?
+    """
     return np.dot(tf[:3, :3], vector) + tf[:3, 3]
 
 

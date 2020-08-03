@@ -1,4 +1,5 @@
 import numpy as np
+import acrobotics as ab
 import matplotlib.pyplot as plt
 
 from acrolib.quaternion import Quaternion
@@ -6,21 +7,6 @@ from acrolib.sampling import SampleMethod
 from acrolib.plotting import get_default_axes3d
 
 from acrobotics.robot import Robot
-from acrobotics.robot_examples import Kuka
-from acrobotics.geometry import Scene
-from acrobotics.shapes import Box
-
-from acrobotics.path.tolerance import NoTolerance, QuaternionTolerance
-from acrobotics.path.path_pt import FreeOrientationPt
-from acrobotics.path.sampling import SamplingSetting, SearchStrategy
-from acrobotics.planning.types import (
-    CostFuntionType,
-    SolveMethod,
-    Solution,
-    PlanningSetup,
-)
-from acrobotics.planning.settings import SolverSettings, OptSettings
-from acrobotics.planning.solver import solve
 
 
 def test_complete_problem():
@@ -30,46 +16,46 @@ def test_complete_problem():
         yi = s * 0.2 + (1 - s) * (-0.2)
         zi = 0.2
         path_ori_free.append(
-            FreeOrientationPt(
-                [xi, yi, zi], [NoTolerance(), NoTolerance(), NoTolerance()]
+            ab.FreeOrientationPt(
+                [xi, yi, zi], [ab.NoTolerance(), ab.NoTolerance(), ab.NoTolerance()]
             )
         )
 
-    table = Box(0.5, 0.5, 0.1)
+    table = ab.Box(0.5, 0.5, 0.1)
     table_tf = np.array(
         [[1, 0, 0, 0.80], [0, 1, 0, 0.00], [0, 0, 1, 0.12], [0, 0, 0, 1]]
     )
-    scene1 = Scene([table], [table_tf])
+    scene1 = ab.Scene([table], [table_tf])
 
-    robot = Kuka()
+    robot = ab.Kuka()
     # robot.tool = torch
 
-    settings = SamplingSetting(
-        SearchStrategy.INCREMENTAL,
+    settings = ab.SamplingSetting(
+        ab.SearchStrategy.INCREMENTAL,
         1,
         SampleMethod.random_uniform,
         500,
         tolerance_reduction_factor=2,
     )
 
-    solve_set = SolverSettings(
-        SolveMethod.sampling_based,
-        CostFuntionType.sum_squared,
+    solve_set = ab.SolverSettings(
+        ab.SolveMethod.sampling_based,
+        ab.CostFuntionType.sum_squared,
         sampling_settings=settings,
     )
 
-    setup = PlanningSetup(robot, path_ori_free, scene1)
+    setup = ab.PlanningSetup(robot, path_ori_free, scene1)
 
-    sol1 = solve(setup, solve_set)
+    sol1 = ab.solve(setup, solve_set)
     assert sol1.success
 
-    s2 = SolverSettings(
-        SolveMethod.optimization_based,
-        CostFuntionType.sum_squared,
-        opt_settings=OptSettings(q_init=np.array(sol1.joint_positions)),
+    s2 = ab.SolverSettings(
+        ab.SolveMethod.optimization_based,
+        ab.CostFuntionType.sum_squared,
+        opt_settings=ab.OptSettings(q_init=np.array(sol1.joint_positions)),
     )
 
-    sol2 = solve(setup, s2)
+    sol2 = ab.solve(setup, s2)
 
     assert sol2.success
 

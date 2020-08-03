@@ -5,31 +5,27 @@ This example shows how to create a planning scene,
 visualize a robot and check for collision between the two.
 Also, forward and inverse kinematics are nice.
 """
+import acrobotics as ab
+
 # ======================================================
 # Get a ready to go robot implementation
 # ======================================================
-from acrobotics.robot_examples import Kuka
-
-robot = Kuka()
+robot = ab.Kuka()
 
 # ======================================================
 # Create planning scene
 # ======================================================
-from acrobotics.geometry import Scene
-from acrobotics.shapes import Box
-
-
 # A transform matrix is represented by a 4x4 numpy array
 # Here we create one using a helper function for readability
 from acrolib.geometry import translation
 
-table = Box(2, 2, 0.1)
+table = ab.Box(2, 2, 0.1)
 T_table = translation(0, 0, -0.2)
 
-obstacle = Box(0.2, 0.2, 1.5)
+obstacle = ab.Box(0.2, 0.2, 1.5)
 T_obs = translation(0, 0.5, 0.55)
 
-scene = Scene([table, obstacle], [T_table, T_obs])
+scene = ab.Scene([table, obstacle], [T_table, T_obs])
 
 # ======================================================
 # Linear interpolation path from start to goal

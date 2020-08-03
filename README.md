@@ -38,9 +38,9 @@ This library has three main tricks.
 
 Forward kinematics are implemented in a generic `RobotKinematics` class.
 ```python
-from acrobotics.robot_examples import Kuka
+import acrobotics as ab
 
-robot = Kuka()
+robot = ab.Kuka()
 
 joint_values = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
 T_fk = robot.fk(joint_values)
@@ -67,16 +67,15 @@ Inverse kinematics successful? True
 
 First create a planning scene with obstacles the robot can collide with.
 ```python
-from acrobotics.geometry import Scene
-from acrobotics.shapes import Box
+from acrolib.geometry import translation
 
-table = Box(2, 2, 0.1)
+table = ab.Box(2, 2, 0.1)
 T_table = translation(0, 0, -0.2)
 
-obstacle = Box(0.2, 0.2, 1.5)
+obstacle = ab.Box(0.2, 0.2, 1.5)
 T_obs = translation(0, 0.5, 0.55)
 
-scene = Scene([table, obstacle], [T_table, T_obs])
+scene = ab.Scene([table, obstacle], [T_table, T_obs])
 ```
 
 Then create a list of robot configurations for wich you want to check collision with the planning scene.
@@ -115,6 +114,16 @@ robot.animate_path(fig, ax, q_path)
 
 There's a more in depth explanation in the jupyter-notebooks in the examples folder.
 
+Most of the usefull stuff can be imported similar to common numpy usage:
+```Python
+import acrobotics as ab
+```
+For more advanced classes, such as `Robot` to create a custom robot, you have to explicitly import them:
+```Python
+from acrobotics.robot import Robot
+from acrobotics.link import DHLink, JointType, Link
+```
+
 ## And motion planning?
 
-Comming soon.
+The package implements a basic sampling-based and optimization-based planner. Examples on how to use them can be found in the test folder, in [test_planning_sampling_based.py](tests/test_planning_optimization_based.py) and [test_planning_optimization_based.py](tests/test_planning_optimization_based.py). However, there is a non-trivial amount of setting types you have to supply to get it working. These appeared after a major refactor in an attempt to make to code more maintainable, but we went a bit overboard in the settings department...
