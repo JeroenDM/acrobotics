@@ -1,9 +1,10 @@
 import numpy as np
+import casadi as ca
 
 from abc import ABC
 from collections import namedtuple
 from matplotlib import animation
-from typing import List
+from typing import List, Callable
 from acrobotics.geometry import Scene
 from acrobotics.link import Link
 from acrolib.plotting import plot_reference_frame
@@ -111,6 +112,7 @@ class RobotCasadiKinematics(ABC):
     links: List[Link]
     tf_base: np.ndarray
     tf_tool_tip: np.ndarray
+    jacobian_fun: Callable
 
     def fk_casadi(self, q):
         T = self.tf_base
@@ -132,6 +134,14 @@ class RobotCasadiKinematics(ABC):
             tf_links.append(T)
         return tf_links
 
+    def jacobian(self, q):
+        return self.jacobian_fun(q)
+
+    def _create_jacobian(self):
+        q = ca.MX.sym("q", self.ndof)
+        jac = ca.jacobian(self.fk_casadi(q)[:3, 3], q)
+        return ca.Function("jac_fun", [q], [jac])
+
 
 class Robot(RobotKinematics, RobotCasadiKinematics):
     def __init__(self, links, joint_limits=None):
@@ -152,6 +162,8 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
 
         # loggers to get performance criteria
         self.cc_checks = 0
+
+        self.jacobian_fun = self._create_jacobian()
 
     @property
     def tool(self):
