@@ -5,7 +5,7 @@ from .robot import Robot, Tool, JointLimit
 from .link import Link, DHLink, JointType
 from .geometry import Scene
 from .shapes import Box
-from .inverse_kinematics import spherical_wrist, anthropomorphic_arm, arm_2
+from .inverse_kinematics import spherical_wrist, anthropomorphic_arm, arm_2, planar_arm
 from .inverse_kinematics.ik_result import IKResult
 
 PI = np.pi
@@ -42,6 +42,10 @@ class PlanarArm(Robot):
                 Link(DHLink(a3, 0, 0, 0), JointType.revolute, geometry[2]),
             ]
         )
+
+    def ik(self, T):
+        # TODO is tool tip and base frame correction ok?
+        return planar_arm.ik(T, self.links, self.tf_base)
 
 
 class SphericalArm(Robot):

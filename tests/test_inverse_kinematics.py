@@ -7,6 +7,7 @@ from acrobotics.robot_examples import (
     Arm2,
     Kuka,
     KukaOnRail,
+    PlanarArm,
 )
 from acrolib.geometry import pose_x
 
@@ -24,6 +25,18 @@ tool_tip_transform = np.array(
 
 
 class TestIK:
+    def test_planar_arm(self):
+        bot = PlanarArm()
+        N = 20
+        q_rand = np.random.rand(N, 3) * 2 * PI - PI
+        for qi in q_rand:
+            T1 = bot.fk(qi)
+            resi = bot.ik(T1)
+            assert resi.success
+            for q_sol in resi.solutions:
+                p2 = bot.fk(q_sol)[:3, 3]
+                assert_almost_equal(T1[:3, 3], p2)
+
     def test_aa_random(self):
         bot = AnthropomorphicArm()
         N = 20
