@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot name="example_after.urdf" xmlns:xacro="http://wiki.ros.org/xacro">
+<link name="world"/>
+
+<material name="green">
+    <color rgba="0 0.8 0 1.0"/>
+</material>
+
+
+<link name="shape_0">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="1.4209492813037066 1.6776236166737923 0.1"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="1.4209492813037066 1.6776236166737923 0.1"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_shape_0" type="fixed">
+  <parent link="world"/>
+  <child link="shape_0"/>
+  <origin xyz="0.8821074803092149 1.5996462281551953 0.0" rpy="-0.0 0.0 -1.1149614027577197" />
+</joint>
+<link name="shape_1">
+  <visual>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="2.1528786309263555 1.01475050918614 0.1"/>
+    </geometry>
+    <material name="green"/>
+  </visual>
+  <collision>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <geometry>
+      <box size="2.1528786309263555 1.01475050918614 0.1"/>
+    </geometry>
+  </collision>
+</link>
+<joint name="world_to_shape_1" type="fixed">
+  <parent link="world"/>
+  <child link="shape_1"/>
+  <origin xyz="0.95848286235727 -0.0393683392119097 0.0" rpy="-0.0 0.0 -1.1768757881094563" />
+</joint>
+
+</robot>
