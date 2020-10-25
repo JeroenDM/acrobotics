@@ -40,7 +40,7 @@ def get_optimal_path(
     print(w)
 
     opti = ca.Opti()
-    q = opti.variable(N, 6)  #  joint variables along path
+    q = opti.variable(N, robot.ndof)  #  joint variables along path
 
     # collision constraints
     if scene is not None:
@@ -247,4 +247,3 @@ def create_cc(opti, robot: Robot, scene: Scene, q):
         )
 
     return cons
-
