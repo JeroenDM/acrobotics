@@ -53,6 +53,43 @@ def test_planer_arm():
 
     for _ in range(NUM_RANDOM_TESTS):
         q = np.random.rand(robot.ndof)
-        j_exact = robot.jacobian(q)
+        j_exact = robot.jacobian_position(q)
         j_approx = numeric_jacobian(lambda q: robot.fk(q)[:3, 3], q)
         assert_almost_equal(j_exact, j_approx)
+
+
+def test_planer_arm_rpy():
+    robot = ab.PlanarArm()
+
+    q = np.random.rand(robot.ndof)
+    print(robot.fk_rpy_casadi(q))
+
+    for _ in range(NUM_RANDOM_TESTS):
+        q = np.random.rand(robot.ndof)
+        j_exact = robot.jacobian_rpy(q)
+        j_approx = numeric_jacobian(lambda q: robot.fk_rpy(q), q)
+        assert_almost_equal(j_exact, j_approx)
+
+
+def test_kuka():
+    robot = ab.Kuka()
+
+    for _ in range(NUM_RANDOM_TESTS):
+        q = np.random.rand(robot.ndof)
+        j_exact = robot.jacobian_position(q)
+        j_approx = numeric_jacobian(lambda q: robot.fk(q)[:3, 3], q)
+        assert_almost_equal(j_exact, j_approx)
+
+
+def test_kuka_rpy():
+    robot = ab.Kuka()
+
+    q = np.random.rand(robot.ndof)
+    print(robot.fk_rpy_casadi(q))
+
+    for _ in range(NUM_RANDOM_TESTS):
+        q = np.random.rand(robot.ndof)
+        j_exact = robot.jacobian_rpy(q)
+        j_approx = numeric_jacobian(lambda q: robot.fk_rpy(q), q)
+        assert_almost_equal(j_exact[:3, :], j_approx[:3, :])
+        assert_almost_equal(j_exact[3:, :], j_approx[3:, :], decimal=5)

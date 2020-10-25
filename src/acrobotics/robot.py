@@ -68,6 +68,17 @@ class RobotKinematics:
             T = np.dot(T, self.tf_tool_tip)
         return T
 
+    def fk_rpy(self, q) -> np.ndarray:
+        T = self.fk(q)
+        s = np.sqrt(T[0, 0] * T[0, 0] + T[0, 1] * T[0, 1])
+        r_x = np.arctan2(-T[1, 2], T[2, 2])
+        r_y = np.arctan2(T[0, 2], s)
+        r_z = np.arctan2(-T[0, 1], T[2, 2])
+        out = np.zeros(6)
+        out[:3] = T[:3, 3]
+        out[3:] = [r_x, r_y, r_z]
+        return out
+
     def fk_all_links(self, q) -> List[np.ndarray]:
         """ Return link frames (not base or tool)
         """
@@ -112,7 +123,8 @@ class RobotCasadiKinematics(ABC):
     links: List[Link]
     tf_base: np.ndarray
     tf_tool_tip: np.ndarray
-    jacobian_fun: Callable
+    jacobian_position_fun: Callable
+    jacobian_rpy_fun: Callable
 
     def fk_casadi(self, q):
         T = self.tf_base
@@ -122,6 +134,14 @@ class RobotCasadiKinematics(ABC):
         if self.tf_tool_tip is not None:
             T = T @ self.tf_tool_tip
         return T
+
+    def fk_rpy_casadi(self, q):
+        T = self.fk_casadi(q)
+        s = ca.sqrt(T[0, 0] * T[0, 0] + T[0, 1] * T[0, 1])
+        r_x = ca.arctan2(-T[1, 2], T[2, 2])
+        r_y = ca.arctan2(T[0, 2], s)
+        r_z = ca.arctan2(-T[0, 1], T[2, 2])
+        return ca.vcat([T[:3, 3], r_x, r_y, r_z])
 
     def fk_all_links_casadi(self, q):
         """ Return link frames (not base or tool)
@@ -134,12 +154,20 @@ class RobotCasadiKinematics(ABC):
             tf_links.append(T)
         return tf_links
 
-    def jacobian(self, q):
-        return self.jacobian_fun(q)
+    def jacobian_position(self, q):
+        return self.jacobian_position_fun(q)
 
-    def _create_jacobian(self):
+    def jacobian_rpy(self, q):
+        return self.jacobian_rpy_fun(q)
+
+    def _create_jacobian_position(self):
         q = ca.MX.sym("q", self.ndof)
         jac = ca.jacobian(self.fk_casadi(q)[:3, 3], q)
+        return ca.Function("jac_fun", [q], [jac])
+
+    def _create_jacobian_rpy(self):
+        q = ca.MX.sym("q", self.ndof)
+        jac = ca.jacobian(self.fk_rpy_casadi(q), q)
         return ca.Function("jac_fun", [q], [jac])
 
 
@@ -163,7 +191,8 @@ class Robot(RobotKinematics, RobotCasadiKinematics):
         # loggers to get performance criteria
         self.cc_checks = 0
 
-        self.jacobian_fun = self._create_jacobian()
+        self.jacobian_position_fun = self._create_jacobian_position()
+        self.jacobian_rpy_fun = self._create_jacobian_rpy()
 
     @property
     def tool(self):
