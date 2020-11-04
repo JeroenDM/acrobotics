@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="acrobotics",
-    version="0.0.5",
+    version="0.0.6",
     author="Jeroen De Maeyer",
     author_email="jeroen.demaeyer@kuleuven.be",
     description="Primitive robot kinematics and collision checking.",
