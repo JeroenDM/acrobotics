@@ -1,6 +1,7 @@
 import numpy as np
 from string import Template
 from urdfpy import URDF
+from acrolib.geometry import rotation_matrix_to_rpy
 
 from acrobotics.shapes import Box
 from acrobotics.geometry import Scene
@@ -35,7 +36,7 @@ _joint_template = Template(
     """<joint name="world_to_$name" type="fixed">
   <parent link="world"/>
   <child link="$name"/>
-  <origin xyz="$xyz" rpy="0 0 0" />
+  <origin xyz="$xyz" rpy="$rpy" />
 </joint>"""
 )
 
@@ -63,22 +64,41 @@ def create_urdf_data(scene, names):
 
     sizes = []
     positions = []
+    rotations = []
     for box, tf_box in zip(scene.shapes, scene.tf_s):
         sizes.append([box.dx, box.dy, box.dz])
         positions.append(tf_box[:3, 3])
+        rotations.append(rotation_matrix_to_rpy(tf_box[:3, :3]))
 
     boxes = []
-    for name, size, position in zip(names, sizes, positions):
+    for name, size, xyz, rpy in zip(names, sizes, positions, rotations):
         new_box = {}
         new_box["name"] = name
         new_box["size"] = list_to_string(size)
-        new_box["xyz"] = list_to_string(position)
+        new_box["xyz"] = list_to_string(xyz)
+        new_box["rpy"] = list_to_string(rpy)
         boxes.append(new_box)
 
     return boxes
 
 
 def export_urdf(scene, name, path):
+    """ Convert a Scene object to an urdf file.
+
+    params
+    ------
+    scene : acrobotics.geometry.Scene
+      A scene containing shapes and their transforms in the world frame.
+    name : str
+      The filename for the urdf, extension ".urdf" is optional.
+      It will be added if not present.
+    path : str
+      Relative or absolute path to where the urdf file should be saved.
+    """
+    # add '.urdf' extension if it was not added by the user
+    if not name.endswith(".urdf"):
+        name += ".urdf"
+
     shape_names = ["shape_{}".format(i) for i in range(len(scene.shapes))]
     urdf_data = create_urdf_data(scene, shape_names)
 
@@ -87,7 +107,7 @@ def export_urdf(scene, name, path):
         content += _box_template.substitute(box) + "\n"
         content += _joint_template.substitute(box) + "\n"
 
-        with open("{}/{}.urdf".format(path, name), "w") as file:
+        with open("{}/{}".format(path, name), "w") as file:
             file.write(_urdf_template.substitute({"name": name, "content": content}))
 
 
@@ -108,8 +128,12 @@ def parse_link(link):
     return Box(size[0], size[1], size[2])
 
 
-def import_urdf(path):
-    urdf = URDF.load(path)
+def import_urdf(name, path):
+    # add '.urdf' extension if it was not added by the user
+    if not name.endswith(".urdf"):
+        name += ".urdf"
+
+    urdf = URDF.load("{}/{}".format(path, name))
     root = urdf.base_link.name
 
     shapes = {}
